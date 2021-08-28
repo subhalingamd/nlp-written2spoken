@@ -28,9 +28,10 @@ def analyze(in_path: str,gold_path: str) -> None:
   for i,o in zip(input_data,output_data):
     for ii,oo in zip(i["input_tokens"],o["output_tokens"]):
       #if len(ii)==1 and re.match(r"[^A-Z0-9]",ii) and oo!="sil":
-      #if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
+      #if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
+      if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z.]{0,}$",ii):
       #if REGEX["roman"].match(ii):
-      if re.match(r"[0-9]",ii):
+      #if re.match(r"[0-9]",ii):
         print(ii,"\t:\t",oo)
 
 
@@ -41,7 +42,7 @@ REGEX={
   "punctuation": re.compile(r"[^A-Z0-9]"),
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|I|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
-  "abbreviation": re.compile(r"^[A-Z]{1,}$"),
+  "abbreviation": re.compile(r"^[A-Z][A-Z.]{0,}$"),
 }
 
 
@@ -73,7 +74,7 @@ def is_abbreviation(token: str) -> bool:
   return REGEX['abbreviation'].match(token);
 
 def handle_abbreviation(token: str) -> str:
-  return " ".join(list(token.lower()))
+  return " ".join(list(token.replace(".","").lower()))
 
 def solution(input_tokens: [str]) -> [str]:
   sol = []
