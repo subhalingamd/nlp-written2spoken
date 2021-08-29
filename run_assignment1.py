@@ -57,7 +57,7 @@ def handle_number_to_words(token: str) -> bool:
   ones = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
   twos = ('ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
   tens = ('twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred')
-  suffixes = ('', 'thousand', 'million', 'billion')
+  suffixes = ('', 'thousand', 'million', 'billion', 'trillion', 'quadrillion')
 
   def process(number, index):
       
@@ -103,7 +103,7 @@ def handle_number_to_words(token: str) -> bool:
   def getWords(number):
       length = len(str(number))
       
-      if length>12: # cannot handle currently
+      if length>18: # cannot handle currently
           return str(number)
       
       count = length // 3 if length % 3 == 0 else length // 3 + 1
