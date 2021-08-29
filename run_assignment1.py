@@ -46,7 +46,7 @@ REGEX={
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|I|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
   "abbreviation": re.compile(r"^[A-Z][A-Z.]{0,}$"),
-  "time": re.compile(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]")
+  "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]")
 }
 
 
@@ -107,7 +107,7 @@ def handle_number_to_words(token: str) -> bool:
       odigit = int(number[2])
       
       words += '' if number[0] == '0' else ones[hdigit]
-      words += ' Hundred ' if not words == '' else ''
+      words += ' hundred ' if not words == '' else ''
       
       if(tdigit > 1):
           words += tens[tdigit - 2]
@@ -151,26 +151,37 @@ def handle_number_to_words(token: str) -> bool:
       
       return final_words
   # End Main Logic
-  return getWords(int(token))
+  return getWords(int(token)).strip()
 
 def is_time(token: str) -> bool:
   return REGEX['time'].match(token)
 
 def handle_time(token: str) -> str:
-  token = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",token).strip()
+  token = re.sub(r"([0-9]{1,})\s*:\s*([0-5][0-9])",r" \1:\2 ",token).strip()
+  token = re.sub(r"([0-9]{1,}:[0-5][0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",token).strip() # seconds
   tokens = token.split()
   times = tokens[0].split(':')
 
   token = [handle_number_to_words(times[0])]  # output
-  if times[1] == "00":
-    if tokens[1].lower().replace(".","") not in ["am","pm"]:  # if no am/pm
-      token.append("hundred")
-  else:
-    token.append(handle_number_to_words(times[1]))
 
-  # handle "hrs" text :: TODO
+  if len(times)==3:
+    token.extend(['hours', handle_number_to_words(times[1]), 'minutes and', handle_number_to_words(times[2]), 'seconds'])
+  elif int(times[0]) >= 24: # if hrs > 24 => countdown
+    token.extend(['hours and', handle_number_to_words(times[1]), 'minutes'])
+  else:
+    if times[1] == "00":
+      if int(times[0]) > 12:  # adding "hundred" if min == "00"  :: TODO
+      #if len(tokens) <= 1 or tokens[1].lower().replace(".","") not in ["am","pm"]:  # if no am/pm
+        token.append("hundred")
+    else:
+      token.append(handle_number_to_words(times[1]))
+
 
   for i in range(1,len(tokens)):
+    # handle "hrs" text :: TODO
+    if tokens[i].lower().replace(".","") in ["hrs","hr"]:
+      token.append('hours')
+      continue
     token.append(handle_abbreviation(tokens[i]))
 
   token = " ".join(token)
