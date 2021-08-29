@@ -43,7 +43,7 @@ def analyze(in_path: str,gold_path: str) -> None:
 
 REGEX={
   "punctuation": re.compile(r"[^A-Z0-9]"),
-  "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|I|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
+  "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
   "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]")
@@ -132,10 +132,10 @@ def handle_punctuation(token: str) -> str:
   return "sil"
 
 def is_roman_exception(token: str) -> bool:
-  return REGEX['roman_exception'].match(token)
+  return len(token)>1 and REGEX['roman_exception'].match(token)
 
 def is_roman(token: str) -> bool:
-  return REGEX['roman'].match(token)
+  return len(token)>1 and REGEX['roman'].match(token)
 
 def handle_roman_to_numeral(token: str) -> str:
   # Adapted from: https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-2.php
@@ -150,7 +150,7 @@ def handle_roman_to_numeral(token: str) -> str:
 
 
 def is_abbreviation(token: str) -> bool:
-  return REGEX['abbreviation'].match(token);
+  return len(token)>1 and REGEX['abbreviation'].match(token);
 
 def handle_abbreviation(token: str) -> str:
   return " ".join(list(token.replace(".","").replace(" ","").lower()))
