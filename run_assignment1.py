@@ -29,7 +29,7 @@ def analyze(in_path: str,gold_path: str) -> None:
     for ii,oo in zip(i["input_tokens"],o["output_tokens"]):
       #if len(ii)==1 and re.match(r"[^A-Z0-9]",ii) and oo!="sil":
       #if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
-      if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
+      if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
       #if REGEX["roman"].match(ii):
       #if re.match(r"[0-9]",ii):
       #if re.match(r"\d+\s*:\s*\d+",ii):
@@ -49,36 +49,6 @@ REGEX={
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]")
 }
 
-
-def is_punctuation(token: str) -> bool:
-  return len(token)==1 and REGEX['punctuation'].match(token)
-
-def handle_punctuation(token: str) -> str:
-  return "sil"
-
-def is_roman_exception(token: str) -> bool:
-  return REGEX['roman_exception'].match(token)
-
-def is_roman(token: str) -> bool:
-  return REGEX['roman'].match(token)
-
-def handle_roman_to_numeral(token: str) -> str:
-  # Adapted from: https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-2.php
-  rom_val = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
-  int_val = rom_val[token[0]]
-  for i in range(1,len(token)):
-      if rom_val[token[i]] > rom_val[token[i - 1]]:
-          int_val += rom_val[token[i]] - 2 * rom_val[token[i - 1]]
-      else:
-          int_val += rom_val[token[i]]
-  return int_val
-
-
-def is_abbreviation(token: str) -> bool:
-  return REGEX['abbreviation'].match(token);
-
-def handle_abbreviation(token: str) -> str:
-  return " ".join(list(token.replace(".","").replace(" ","").lower()))
 
 def handle_number_to_words(token: str) -> bool:
   # Adapted from: https://www.codesansar.com/python-programming-examples/number-words-conversion-no-library-used.htm
@@ -152,6 +122,39 @@ def handle_number_to_words(token: str) -> bool:
       return final_words
   # End Main Logic
   return getWords(int(token)).strip()
+
+
+
+def is_punctuation(token: str) -> bool:
+  return len(token)==1 and REGEX['punctuation'].match(token)
+
+def handle_punctuation(token: str) -> str:
+  return "sil"
+
+def is_roman_exception(token: str) -> bool:
+  return REGEX['roman_exception'].match(token)
+
+def is_roman(token: str) -> bool:
+  return REGEX['roman'].match(token)
+
+def handle_roman_to_numeral(token: str) -> str:
+  # Adapted from: https://www.w3resource.com/python-exercises/class-exercises/python-class-exercise-2.php
+  rom_val = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
+  int_val = rom_val[token[0]]
+  for i in range(1,len(token)):
+      if rom_val[token[i]] > rom_val[token[i - 1]]:
+          int_val += rom_val[token[i]] - 2 * rom_val[token[i - 1]]
+      else:
+          int_val += rom_val[token[i]]
+  return handle_number_to_words(int_val)
+
+
+def is_abbreviation(token: str) -> bool:
+  return REGEX['abbreviation'].match(token);
+
+def handle_abbreviation(token: str) -> str:
+  return " ".join(list(token.replace(".","").replace(" ","").lower()))
+
 
 def is_time(token: str) -> bool:
   return REGEX['time'].match(token)
