@@ -191,23 +191,25 @@ def handle_time(token: str) -> str:
   return token
 
 
+def process(token: str) -> str:
+  if is_punctuation(token):
+    return handle_punctuation(token)
+  elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
+    return handle_abbreviation(token)
+  elif is_roman(token):
+    return handle_roman_to_numeral(token)
+  elif is_abbreviation(token):
+    return handle_abbreviation(token)
+  elif is_time(token):
+    return handle_time(token)
+  else:
+    return '<self>'
 
 def solution(input_tokens: [str]) -> [str]:
   sol = []
   for token in input_tokens:
     token = token.strip()
-    if is_punctuation(token):
-      sol.append(handle_punctuation(token))
-    elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
-      sol.append(handle_abbreviation(token))
-    elif is_roman(token):
-      sol.append(handle_roman_to_numeral(token))
-    elif is_abbreviation(token):
-      sol.append(handle_abbreviation(token))
-    elif is_time(token):
-      sol.append(handle_time(token))
-    else:
-      sol.append('<self>')
+    sol.append(process(token))
 
   return sol
   
