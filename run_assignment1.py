@@ -29,11 +29,14 @@ def analyze(in_path: str,gold_path: str) -> None:
     for ii,oo in zip(i["input_tokens"],o["output_tokens"]):
       #if len(ii)==1 and re.match(r"[^A-Z0-9]",ii) and oo!="sil":
       #if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
-      if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
+      #if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
       #if REGEX["roman"].match(ii):
       #if re.match(r"[0-9]",ii):
       #if re.match(r"\d+\s*:\s*\d+",ii):
       #if re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
+      #if re.match(r"\d",ii) and not re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
+      #if re.match(r"\d?\d (january|february|march|april|may|june|july|august|september|october|november|december) \d\d\d\d", ii.lower()):
+      #if re.match(r"^\d\d\d\d[\/\-\.]\d\d[\/\-\.]\d\d$",ii):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
         print(ii,"\t:\t",oo)
 
@@ -41,12 +44,22 @@ def analyze(in_path: str,gold_path: str) -> None:
 
 """# Solution"""
 
+MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
+DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
+
 REGEX={
   "punctuation": re.compile(r"[^A-Z0-9]"),
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
   "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
-  "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]")
+  "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]"),
+
+  "date": re.compile(r"(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s*((?:\'|\d?\d)\d\d)"),
+  "date_1": re.compile(r"((?:"+ r'|'.join(MONTHS) +r"))\s*(\d?\d)\s*([a-z]{0,2}?)\s*\,?\s*((?:\'|\d?\d)\d\d)"),
+  "date_abbr": re.compile(r"(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)"),
+  "date_abbr_1": re.compile(r"((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)"),
+  "date_2": re.compile(r"(\d?\d\d\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)"),
+  "date_3": re.compile(r"(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)")
 }
 
 
@@ -189,6 +202,78 @@ def handle_time(token: str) -> str:
 
   token = " ".join(token)
   return token
+
+
+def is_date(token: str) -> bool:
+  token = token.lower()
+  return REGEX['date'].match(token) or REGEX['date_abbr'].match(token) or REGEX['date_1'].match(token) or REGEX['date_abbr_1'].match(token) or REGEX['date_2'].match(token) or REGEX['date_3'].match(token)
+
+def preprocess_date(token: str) -> str:
+  token = token.lower()
+  if REGEX['date'].match(token):
+    return REGEX['date'].sub(r"\1 \3 \4",token)
+  elif REGEX['date_1'].match(token):
+    return REGEX['date_1'].sub(r"\2 \1 \4",token)
+  elif REGEX['date_abbr'].match(token):
+    s = REGEX['date_abbr'].sub(r"\1 \3 \4",token).split()
+    for m in MONTHS:
+      if m.startswith(s[1]):
+        s[1] = m
+        break
+    return " ".join(s)
+  elif REGEX['date_abbr_1'].match(token):
+    s = REGEX['date_abbr_1'].sub(r"\2 \1 \4",token).split()
+    for m in MONTHS:
+      if m.startswith(s[1]):
+        s[1] = m
+        break
+    return " ".join(s)
+  elif REGEX['date_2'].match(token):
+    s = REGEX['date_2'].sub(r"\3 \2 \1",token).split()
+    # try..except if index error.. maybe telephone number :: TODO
+    if int(s[1]) > 12:
+      s[0],s[1] = s[1],s[0]
+    s[1] = MONTHS[int(s[1])-1]
+    return " ".join(s)
+  elif REGEX['date_3'].match(token):
+    s = REGEX['date_3'].sub(r"\1 \2 \3",token).split()
+    if int(s[1]) > 12:
+      s[0],s[1] = s[1],s[0]
+    s[1] = MONTHS[int(s[1])-1]
+    return " ".join(s)
+  else:
+    return token
+
+def handle_date__year(token: str) -> str:
+  if token == "0000": # ?
+    return "zero"
+
+  if token[0] == "'":
+    token = token[1:]
+
+  if len(token) <= 3:
+    return handle_number_to_words(token)
+
+  if token[1:] == "000":
+    return handle_number_to_words(token)
+  elif token[2:] == "00":
+    return handle_number_to_words(token[:2])+" hundred"
+  elif token[1:3] == "00":
+    return handle_number_to_words(token)
+  elif token[2] == "0":
+    return handle_number_to_words(token[:2])+" o "+handle_number_to_words(token[3])
+  else:
+    return handle_number_to_words(token[:2]) + " " + handle_number_to_words(token[2:])
+
+def handle_date(token: str) -> str:
+  tokens = preprocess_date(token).split()
+  d = tokens[0] ## TODO
+  m = tokens[1]
+  y = handle_date__year(tokens[2])
+
+  # --00 thousand; 200- two thousand xx; 1908 --o--; 
+  return " ".join(['the',d,'of',m,y])
+
 
 
 def to_spoken(token: str) -> str:
