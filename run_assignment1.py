@@ -37,6 +37,7 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if re.match(r"\d",ii) and not re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
       #if re.match(r"\d?\d (january|february|march|april|may|june|july|august|september|october|november|december) \d\d\d\d", ii.lower()):
       #if re.match(r"^\d\d\d\d[\/\-\.]\d\d[\/\-\.]\d\d$",ii):
+      if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
         print(ii,"\t:\t",oo)
 
@@ -46,6 +47,7 @@ def analyze(in_path: str,gold_path: str) -> None:
 
 MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
 DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
+DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
 
 REGEX={
   "punctuation": re.compile(r"[^A-Z0-9]"),
@@ -59,7 +61,9 @@ REGEX={
   "date_abbr": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
   "date_abbr_1": re.compile(r"^((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
   "date_2": re.compile(r"^(\d?\d\d\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)$"),
-  "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$")
+  "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
+
+  "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\( ]+\s*\d+\s*[0-9\-\(\) ]*$")
 }
 
 
@@ -276,6 +280,21 @@ def handle_date(token: str) -> str:
 
 
 
+def is_number_spoken_as_digits(token: str) -> str:
+  return "/" not in token and REGEX['number_by_digits'].match(token)
+
+def handle_number_spoken_as_digits(token: str) -> str:
+  ans = []
+  for ch in token:
+    if REGEX['punctuation'].match(ch):
+      p = handle_punctuation(ch)
+      ans.append(p) if len(ans)==0 or ans[-1]!=p else None
+    else: ## TODO:: INDEX ERROR?
+      ans.append(DIGITS[int(ch)])
+  return " ".join(ans)
+
+
+
 def to_spoken(token: str) -> str:
   token = token.strip()
   if is_punctuation(token):
@@ -290,6 +309,8 @@ def to_spoken(token: str) -> str:
     return handle_time(token)
   elif is_date(token):
     return handle_date(token)
+  elif is_number_spoken_as_digits(token):
+    return handle_number_spoken_as_digits(token)
   else:
     return '<self>'
 
