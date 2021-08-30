@@ -37,7 +37,8 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if re.match(r"\d",ii) and not re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
       #if re.match(r"\d?\d (january|february|march|april|may|june|july|august|september|october|november|december) \d\d\d\d", ii.lower()):
       #if re.match(r"^\d\d\d\d[\/\-\.]\d\d[\/\-\.]\d\d$",ii):
-      if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
+      #if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
+      if not re.match(r"[^A-Z0-9]",ii) and re.match(r"^[0-9\.\,]+$", ii.strip()):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
         print(ii,"\t:\t",oo)
 
@@ -63,7 +64,8 @@ REGEX={
   "date_2": re.compile(r"^(\d?\d\d\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)$"),
   "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
 
-  "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\( ]+\s*\d+\s*[0-9\-\(\) ]*$")
+  "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\( ]+\s*\d+\s*[0-9\-\(\) ]*$"),
+  "decimal_number_only": re.compile(r"^[0-9\.\,]+$")   # space? :: TODO
 }
 
 
@@ -293,6 +295,26 @@ def handle_number_spoken_as_digits(token: str) -> str:
       ans.append(DIGITS[int(ch)])
   return " ".join(ans)
 
+def is_decimal_number_only(token: str) -> bool:
+  return REGEX['decimal_number_only'].match(token)  # not match space 
+
+def handle_decimal_number_only(token: str) -> str:
+  if re.match(r"^[1-9]\d\d\d$",token):  # probably a year (no comma!)
+    return handle_date__year(token)
+  elif token.startswith('0') and len(token) == 10 and ',' not in token and '.' not in token:  # probably to be read digit-wise (phone number, ...)
+    return handle_number_spoken_as_digits(token)
+  #elif len(token) == 10:  # phone number?
+  #  return handle_number_spoken_as_digits(token)
+  else:
+    token = token.replace(",","").split(".")
+    ans = handle_number_to_words(token[0])
+    if len(token) > 1:
+      if token[1] == "0":
+        ans+= " point zero"
+      else:
+        ans+= " point " + handle_number_spoken_as_digits(token[1])
+    return ans
+
 
 
 def to_spoken(token: str) -> str:
@@ -311,6 +333,8 @@ def to_spoken(token: str) -> str:
     return handle_date(token)
   elif is_number_spoken_as_digits(token):
     return handle_number_spoken_as_digits(token)
+  elif is_decimal_number_only(token):
+    return handle_decimal_number_only(token)
   else:
     return '<self>'
 
