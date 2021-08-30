@@ -182,7 +182,7 @@ def handle_time(token: str) -> str:
 
   for i in range(1,len(tokens)):
     # handle "hrs" text :: TODO
-    if tokens[i].lower().replace(".","") in ["hrs","hr"]:
+    if "hr" in tokens[i].lower().replace(".",""):
       token.append('hours')
       continue
     token.append(handle_abbreviation(tokens[i]))
