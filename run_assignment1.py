@@ -282,7 +282,7 @@ def handle_date(token: str) -> str:
 
 
 
-def is_number_spoken_as_digits(token: str) -> str:
+def is_number_spoken_as_digits(token: str) -> bool:
   return "/" not in token and REGEX['number_by_digits'].match(token)
 
 def handle_number_spoken_as_digits(token: str) -> str:
