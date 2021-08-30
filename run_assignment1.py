@@ -288,6 +288,8 @@ def to_spoken(token: str) -> str:
     return handle_abbreviation(token)
   elif is_time(token):
     return handle_time(token)
+  elif is_date(token):
+    return handle_date(token)
   else:
     return '<self>'
 
