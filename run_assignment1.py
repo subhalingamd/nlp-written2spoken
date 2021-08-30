@@ -192,6 +192,7 @@ def handle_time(token: str) -> str:
 
 
 def to_spoken(token: str) -> str:
+  token = token.strip()
   if is_punctuation(token):
     return handle_punctuation(token)
   elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
@@ -208,7 +209,6 @@ def to_spoken(token: str) -> str:
 def solution(input_tokens: [str]) -> [str]:
   sol = []
   for token in input_tokens:
-    token = token.strip()
     sol.append(to_spoken(token))
 
   return sol
