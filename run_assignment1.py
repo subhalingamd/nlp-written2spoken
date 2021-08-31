@@ -31,14 +31,14 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
       #if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
       #if REGEX["roman"].match(ii):
-      #if re.match(r"[0-9]",ii):
+      if re.match(r"[0-9]",ii) and not re.match(r"^[0-9\.\,]+$", ii.strip()):
       #if re.match(r"\d+\s*:\s*\d+",ii):
       #if re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
       #if re.match(r"\d",ii) and not re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
       #if re.match(r"\d?\d (january|february|march|april|may|june|july|august|september|october|november|december) \d\d\d\d", ii.lower()):
       #if re.match(r"^\d\d\d\d[\/\-\.]\d\d[\/\-\.]\d\d$",ii):
       #if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
-      if not re.match(r"[^A-Z0-9]",ii) and re.match(r"^[0-9\.\,]+$", ii.strip()):
+      #if not re.match(r"[^A-Z0-9]",ii) and re.match(r"^[0-9\.\,]+$", ii.strip()):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
         print(ii,"\t:\t",oo)
 
@@ -49,6 +49,7 @@ def analyze(in_path: str,gold_path: str) -> None:
 MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
 DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
 DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
+ORDINALS = {"one": "first", "two": "second", "three": "third", "four": "fourth", "five": "fifth", "six": "sixth", "seven": "seventh", "eight": "eighth", "nine": "ninth", "ten": "tenth", "eleven": "eleventh", "twelve": "twelfth"}
 
 REGEX={
   "punctuation": re.compile(r"[^A-Z0-9]"),
@@ -65,7 +66,8 @@ REGEX={
   "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
 
   "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\( ]+\s*\d+\s*[0-9\-\(\) ]*$"),
-  "decimal_number_only": re.compile(r"^[0-9\.\,]+$")   # space? :: TODO
+  "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
+  "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$")
 }
 
 
@@ -315,6 +317,22 @@ def handle_decimal_number_only(token: str) -> str:
         ans+= " point " + handle_number_spoken_as_digits(token[1])
     return ans
 
+def is_ordinal_number(token: str) -> bool:
+  return REGEX['ordinal_number'].match(token.lower())
+
+def handle_ordinal_number(token: str) -> str:
+  token = REGEX['ordinal_number'].sub(r"\1 \2",token.lower()).split()[0]
+  token = handle_decimal_number_only(token)
+  tokens = token.split()
+  suffixed = tokens[-1]
+  try:
+      suffixed = ORDINALS[suffixed]
+  except KeyError:
+      if suffixed[-1] == "y":
+          suffixed = suffixed[:-1] + "ie"
+      suffixed += "th"
+  tokens[-1] = suffixed
+  return " ".join(tokens)
 
 
 def to_spoken(token: str) -> str:
@@ -335,6 +353,8 @@ def to_spoken(token: str) -> str:
     return handle_number_spoken_as_digits(token)
   elif is_decimal_number_only(token):
     return handle_decimal_number_only(token)
+  elif is_ordinal_number(token):
+    return handle_ordinal_number(token)
   else:
     return '<self>'
 
