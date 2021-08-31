@@ -46,6 +46,7 @@ def analyze(in_path: str,gold_path: str) -> None:
 
 """# Solution"""
 
+VOWELS = set(['a','e','i','o','u'])
 MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
 DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
 DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
@@ -385,7 +386,10 @@ def handle_mixed_fraction(token: str) -> str:
   f = handle_fraction_only(f)
 
   if f[:3] == "one":
-    f = "a" + f[3:]
+    if f[4] in VOWELS:
+      f = "an" + f[3:]
+    else:
+      f = "a" + f[3:]
 
   return f"{w} and {f}"
 
