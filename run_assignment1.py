@@ -65,7 +65,7 @@ REGEX={
   "date_2": re.compile(r"^(\d?\d\d\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)$"),
   "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
 
-  "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\( ]+\s*\d+\s*[0-9\-\(\) ]*$"),
+  "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\(\) ]+\s*\d+\s*[0-9\-\(\) ]*$"),
   "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$")
 }
@@ -241,14 +241,20 @@ def preprocess_date(token: str) -> str:
     # try..except if index error.. maybe telephone number :: TODO
     if int(s[1]) > 12:
       s[0],s[1] = s[1],s[0]
-    s[1] = MONTHS[int(s[1])-1]
-    return " ".join(s)
+    try:
+      s[1] = MONTHS[int(s[1])-1]
+      return " ".join(s)
+    except:
+      return token
   elif REGEX['date_3'].match(token):
     s = REGEX['date_3'].sub(r"\1 \2 \3",token).split()
     if int(s[1]) > 12:
       s[0],s[1] = s[1],s[0]
-    s[1] = MONTHS[int(s[1])-1]
-    return " ".join(s)
+    try:
+      s[1] = MONTHS[int(s[1])-1]
+      return " ".join(s)
+    except:
+      return token
   else:
     return token
 
@@ -274,7 +280,12 @@ def handle_date__year(token: str) -> str:
     return handle_number_to_words(token[:2]) + " " + handle_number_to_words(token[2:])
 
 def handle_date(token: str) -> str:
-  tokens = preprocess_date(token).split()
+  token = preprocess_date(token)
+  
+  if not REGEX['date'].match(token):
+    return handle_number_spoken_as_digits(token)
+
+  tokens = token.split()
   d = tokens[0] ## TODO
   m = tokens[1]
   y = handle_date__year(tokens[2])
