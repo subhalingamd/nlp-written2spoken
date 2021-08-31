@@ -68,7 +68,8 @@ REGEX={
   "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\(\) ]+\s*\d+\s*[0-9\-\(\) ]*$"),
   "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
-  "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$")
+  "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
+  "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$")
 }
 
 
@@ -370,10 +371,23 @@ def handle_fraction_only(token: str) -> str:
     else:
       d += "s"
 
-  ## is it "one half"?? :: TODO
+  ## is it "one half"?? :: TODO <<#1>>
   n = handle_number_to_words(n)
 
   return f"{n} {d}"
+
+def is_mixed_fraction(token: str) -> bool:
+  return REGEX['mixed_fraction'].match(token)
+
+def handle_mixed_fraction(token: str) -> str:
+  w, f = token.split()
+  w = handle_number_to_words(w)
+  f = handle_fraction_only(f)
+
+  if f[:3] == "one":
+    f = "a" + f[3:]
+
+  return f"{w} and {f}"
 
 def to_spoken(token: str) -> str:
   token = token.strip()
@@ -397,6 +411,8 @@ def to_spoken(token: str) -> str:
     return handle_ordinal_number(token)
   elif is_fraction_only(token):
     return handle_fraction_only(token)
+  elif is_mixed_fraction(token):
+    return handle_mixed_fraction(token)
   else:
     return '<self>'
 
