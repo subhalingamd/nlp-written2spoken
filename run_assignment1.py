@@ -67,7 +67,8 @@ REGEX={
 
   "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\(\) ]+\s*\d+\s*[0-9\-\(\) ]*$"),
   "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
-  "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$")
+  "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
+  "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$")
 }
 
 
@@ -331,9 +332,12 @@ def handle_decimal_number_only(token: str) -> str:
 def is_ordinal_number(token: str) -> bool:
   return REGEX['ordinal_number'].match(token.lower())
 
-def handle_ordinal_number(token: str) -> str:
+def handle_ordinal_number(token: str, process: bool = True) -> str:
   token = REGEX['ordinal_number'].sub(r"\1 \2",token.lower()).split()[0]
-  token = handle_decimal_number_only(token)
+  if process:
+    token = handle_decimal_number_only(token)
+  else:
+    token = handle_number_to_words(token)
   tokens = token.split()
   suffixed = tokens[-1]
   try:
@@ -345,6 +349,31 @@ def handle_ordinal_number(token: str) -> str:
   tokens[-1] = suffixed
   return " ".join(tokens)
 
+
+def is_fraction_only(token: str) -> bool:
+  return REGEX['fraction_only'].match(token)
+
+def handle_fraction_only(token: str) -> str:
+  token = token.replace(",","").replace(" ","")
+
+  n, d = token.split("/")
+  if d == "2":
+    d = "half"
+  elif d == "4":
+    d = "quater"
+  else:
+    d = handle_ordinal_number(d, process=False)
+
+  if int(n) != 1:
+    if d[-1] == "f": # "half"
+      d = d[:-1] + "ves"
+    else:
+      d += "s"
+
+  ## is it "one half"?? :: TODO
+  n = handle_number_to_words(n)
+
+  return f"{n} {d}"
 
 def to_spoken(token: str) -> str:
   token = token.strip()
@@ -366,6 +395,8 @@ def to_spoken(token: str) -> str:
     return handle_decimal_number_only(token)
   elif is_ordinal_number(token):
     return handle_ordinal_number(token)
+  elif is_fraction_only(token):
+    return handle_fraction_only(token)
   else:
     return '<self>'
 
