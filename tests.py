@@ -114,11 +114,17 @@ def test_handle_date__year():
 
 
 def test_handle_date():
-	assert to_spoken("14th February 2000") == "the 14 of february two thousand"
-	assert to_spoken("Oct. 2, 1950") == "the 2 of october nineteen fifty"
-	assert to_spoken("2009-11-08") == "the 08 of november two thousand nine"
-	assert to_spoken("1|5|1907") == "the 1 of may nineteen o seven"
+	assert to_spoken("14th February 2000") == "the fourteenth of february two thousand"
+	assert to_spoken("Oct. 2, 1950") == "the second of october nineteen fifty"
+	assert to_spoken("2009-11-08") == "the eighth of november two thousand nine"
+	assert to_spoken("1|5|1907") == "the first of may nineteen o seven"
 
+	assert handle_date("2008-13-21") == handle_number_spoken_as_digits("2008-13-21") == to_spoken("2008-13-21") == "two o o eight sil one three sil two one"
+	assert handle_date("21/13/2008") == handle_number_spoken_as_digits("21/13/2008") == to_spoken("21/13/2008") == "two one sil one three sil two o o eight"
+	
+	## TODO::
+	# assert to_spoken("21 janu 2008") == "two one sil two o o eight"
+	assert to_spoken("21 janu 2008") == "<self>"
 
 def test_is_number_spoken_as_digits():
 	assert is_number_spoken_as_digits("1 1/2") == False
@@ -130,13 +136,13 @@ def test_is_number_spoken_as_digits():
 
 
 def test_handle_number_spoken_as_digits():
-	assert handle_number_spoken_as_digits("978-0-304-35252-4") == "nine seven eight sil o sil three o four sil three five two five two sil four"
-	assert handle_number_spoken_as_digits("0-8387-1972-4") == "o sil eight three eight seven sil one nine seven two sil four"
-	assert handle_number_spoken_as_digits("0 7506 0625 8") == "o sil seven five o six sil o six two five sil eight"
-	assert handle_number_spoken_as_digits("978-0753508220") == "nine seven eight sil o seven five three five o eight two two o"
-	assert handle_number_spoken_as_digits("106 (2003) 203-214") == "one o six sil two o o three sil two o three sil two one four"
-	assert handle_number_spoken_as_digits("0 521 400775") == "o sil five two one sil four o o seven seven five"
-	assert handle_number_spoken_as_digits("84-933702-1-5") == "eight four sil nine three three seven o two sil one sil five"
+	assert to_spoken("978-0-304-35252-4") == "nine seven eight sil o sil three o four sil three five two five two sil four"
+	assert to_spoken("0-8387-1972-4") == "o sil eight three eight seven sil one nine seven two sil four"
+	assert to_spoken("0 7506 0625 8") == "o sil seven five o six sil o six two five sil eight"
+	assert to_spoken("978-0753508220") == "nine seven eight sil o seven five three five o eight two two o"
+	assert to_spoken("106 (2003) 203-214") == "one o six sil two o o three sil two o three sil two one four"
+	assert to_spoken("0 521 400775") == "o sil five two one sil four o o seven seven five"
+	assert to_spoken("84-933702-1-5") == "eight four sil nine three three seven o two sil one sil five"
 
 
 def test_handle_decimal_number_only():
@@ -167,4 +173,44 @@ def test_handle_decimal_number_only():
 	assert handle_decimal_number_only("55527") == to_spoken("55527") == "fifty five thousand five hundred twenty seven"
 	assert handle_decimal_number_only("13.0088") == to_spoken("13.0088") == "thirteen point o o eight eight"
 
+def test_is_ordinal_number():
+	assert is_ordinal_number("1") is None
+	assert is_ordinal_number("1st") is not None
+	assert is_ordinal_number("12th") is not None
+	assert is_ordinal_number("23rd") is not None
+	assert is_ordinal_number("1,982rd") is not None
+	assert is_ordinal_number("1230 th") is not None
+
+def test_handle_ordinal_number():
+	assert handle_ordinal_number("1") == "first"
+	assert handle_ordinal_number("2nd") == to_spoken("2nd") == "second"
+	assert handle_ordinal_number("23rd") == to_spoken("23rd") == "twenty third"
+	assert handle_ordinal_number("50th") == to_spoken("50th") == "fiftieth"
+	assert handle_ordinal_number("11th") == to_spoken("11th") == "eleventh"
+	assert handle_ordinal_number("12") == "twelfth"
+	assert handle_ordinal_number("1,805th") == to_spoken("1,805th") == "one thousand eight hundred fifth"
+	assert handle_ordinal_number("1859") == "eighteen fifty ninth"
+
+def test_is_fraction_only():
+	assert is_fraction_only("1/2/2") is None
+	assert is_fraction_only("1,200/2") is not None
+	assert is_fraction_only("1/2,000") is not None
+	assert is_fraction_only("1 /  2,000") is not None
+	assert is_fraction_only("1.0/200") is None
+
+
+def test_handle_fraction_only():
+	assert handle_fraction_only("1/2") == to_spoken("1/2") == "one half" ## check TODO
+	assert handle_fraction_only("3/4") == to_spoken("3/4") == "three quaters"
+	assert handle_fraction_only("2/3") == to_spoken("2/3") == "two thirds"
+	assert handle_fraction_only("1/10") == to_spoken("1/10") == "one tenth"
+	assert handle_fraction_only("917/20") == to_spoken("917/20") == "nine hundred seventeen twentieths"
+	assert handle_fraction_only("7/281") == to_spoken("7/281") == "seven two hundred eighty firsts"
+	assert handle_fraction_only("4/12") == to_spoken("4/12") == "four twelfths"
+
+
+def test_handle_mixed_fraction():
+	assert handle_mixed_fraction("38 57/64") == to_spoken("38 57/64") == "thirty eight and fifty seven sixty fourths"
+	assert handle_mixed_fraction("1 1/2") == to_spoken("1 1/2") == "one and a half"
+	assert handle_mixed_fraction("2 1/8") == to_spoken("2 1/8") == "two and an eighth"
 
