@@ -287,7 +287,7 @@ def handle_date(token: str) -> str:
     return handle_number_spoken_as_digits(token)
 
   tokens = token.split()
-  d = tokens[0] ## TODO
+  d = handle_ordinal_number(tokens[0], process=False)
   m = tokens[1]
   y = handle_date__year(tokens[2])
 
