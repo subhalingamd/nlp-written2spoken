@@ -52,7 +52,7 @@ DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', '
 ORDINALS = {"one": "first", "two": "second", "three": "third", "four": "fourth", "five": "fifth", "six": "sixth", "seven": "seventh", "eight": "eighth", "nine": "ninth", "ten": "tenth", "eleven": "eleventh", "twelve": "twelfth"}
 
 REGEX={
-  "punctuation": re.compile(r"[^A-Z0-9]"),
+  "punctuation": re.compile(r"[^A-Za-z0-9]"),
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
   "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
