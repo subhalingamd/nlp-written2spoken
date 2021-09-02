@@ -59,7 +59,7 @@ REGEX={
   "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]"),
 
-  "date": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
+  "date": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s+((?:\'|\d?\d)\d\d)$"),
   "date_1": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s*(\d?\d)\s*([a-z]{0,2}?)\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
   "date_abbr": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
   "date_abbr_1": re.compile(r"^((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
@@ -224,7 +224,7 @@ def preprocess_date(token: str) -> str:
   if REGEX['date'].match(token):
     return REGEX['date'].sub(r"\1 \3 \4",token)
   elif REGEX['date_1'].match(token):
-    return REGEX['date_1'].sub(r"\2 \1 \4",token)
+    return REGEX['date_1'].sub(r"\1 \2 \4",token)
   elif REGEX['date_abbr'].match(token):
     s = REGEX['date_abbr'].sub(r"\1 \3 \4",token).split()
     for m in MONTHS:
@@ -233,10 +233,10 @@ def preprocess_date(token: str) -> str:
         break
     return " ".join(s)
   elif REGEX['date_abbr_1'].match(token):
-    s = REGEX['date_abbr_1'].sub(r"\2 \1 \4",token).split()
+    s = REGEX['date_abbr_1'].sub(r"\1 \2 \4",token).split()
     for m in MONTHS:
-      if m.startswith(s[1]):
-        s[1] = m
+      if m.startswith(s[0]):
+        s[0] = m
         break
     return " ".join(s)
   elif REGEX['date_2'].match(token):
@@ -285,16 +285,22 @@ def handle_date__year(token: str) -> str:
 def handle_date(token: str) -> str:
   token = preprocess_date(token)
   
-  if not REGEX['date'].match(token):
+  MONTH_FIRST = False
+  if not token[0].isdigit():
+    MONTH_FIRST = True
+  elif not REGEX['date'].match(token):
     return handle_number_spoken_as_digits(token)
 
   tokens = token.split()
-  d = handle_ordinal_number(tokens[0], process=False)
-  m = tokens[1]
+  d = handle_ordinal_number(tokens[0] if not MONTH_FIRST else tokens[1], process=False)
+  m = tokens[1] if not MONTH_FIRST else tokens[0]
   y = handle_date__year(tokens[2])
 
   # --00 thousand; 200- two thousand xx; 1908 --o--; 
-  return " ".join(['the',d,'of',m,y])
+  if MONTH_FIRST:
+    return " ".join([m,d,y])
+  else:  
+    return " ".join(['the',d,'of',m,y])
 
 
 
