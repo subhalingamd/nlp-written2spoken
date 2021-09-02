@@ -59,6 +59,13 @@ REGEX={
   "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]"),
 
+  "date__wo_date": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s+((?:\'|\d?\d)\d\d)$"),
+  "date__wo_date_abbr": re.compile(r"^((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
+  "date__wo_year": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))$"),
+  "date__wo_year_1": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s+(\d?\d)\s*([a-z]{0,2}?)$"),
+  "date__wo_year_abbr": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\.?$"),
+  "date__wo_year_abbr_1": re.compile(r"^((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*(\d?\d)\s*([a-z]{0,2}?)$"),
+  
   "date": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s+((?:\'|\d?\d)\d\d)$"),
   "date_1": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s*(\d?\d)\s*([a-z]{0,2}?)\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
   "date_abbr": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
@@ -217,10 +224,39 @@ def handle_time(token: str) -> str:
 
 def is_date(token: str) -> bool:
   token = token.lower()
-  return REGEX['date'].match(token) or REGEX['date_abbr'].match(token) or REGEX['date_1'].match(token) or REGEX['date_abbr_1'].match(token) or REGEX['date_2'].match(token) or REGEX['date_3'].match(token)
+  return REGEX['date__wo_date'].match(token) or REGEX['date__wo_date_abbr'].match(token) or REGEX['date__wo_year'].match(token) or REGEX['date__wo_year_1'].match(token) or REGEX['date__wo_year_abbr'].match(token) or REGEX['date__wo_year_abbr_1'].match(token) or REGEX['date'].match(token) or REGEX['date_abbr'].match(token) or REGEX['date_1'].match(token) or REGEX['date_abbr_1'].match(token) or REGEX['date_2'].match(token) or REGEX['date_3'].match(token)
 
 def preprocess_date(token: str) -> str:
   token = token.lower()
+  if REGEX['date__wo_date'].match(token):
+    return REGEX['date__wo_date'].sub(r"00 \1 \2",token)
+  elif REGEX['date__wo_date_abbr'].match(token):
+    s = REGEX['date__wo_date_abbr'].sub(r"00 \1 \2",token).split()
+    for m in MONTHS:
+      if m.startswith(s[1]):
+        s[1] = m
+        break
+    return " ".join(s)
+
+  if REGEX['date__wo_year'].match(token):
+    return REGEX['date__wo_year'].sub(r"\1 \3 0000",token)
+  elif REGEX['date__wo_year_1'].match(token):
+    return REGEX['date__wo_year_1'].sub(r"\1 \2 0000",token)
+  elif REGEX['date__wo_year_abbr'].match(token):
+    s = REGEX['date__wo_year_abbr'].sub(r"\1 \3 0000",token).split()
+    for m in MONTHS:
+      if m.startswith(s[1]):
+        s[1] = m
+        break
+    return " ".join(s)
+  elif REGEX['date__wo_year_abbr_1'].match(token):
+    s = REGEX['date__wo_year_abbr_1'].sub(r"\1 \2 0000",token).split()
+    for m in MONTHS:
+      if m.startswith(s[0]):
+        s[0] = m
+        break
+    return " ".join(s)
+
   if REGEX['date'].match(token):
     return REGEX['date'].sub(r"\1 \3 \4",token)
   elif REGEX['date_1'].match(token):
@@ -292,15 +328,25 @@ def handle_date(token: str) -> str:
     return handle_number_spoken_as_digits(token)
 
   tokens = token.split()
-  d = handle_ordinal_number(tokens[0] if not MONTH_FIRST else tokens[1], process=False)
+  d = handle_ordinal_number(tokens[0] if not MONTH_FIRST else tokens[1], process=False) if tokens[0] != "00" else None
   m = tokens[1] if not MONTH_FIRST else tokens[0]
-  y = handle_date__year(tokens[2])
+  y = handle_date__year(tokens[2]) if tokens[2] != "0000" else None
 
   # --00 thousand; 200- two thousand xx; 1908 --o--; 
   if MONTH_FIRST:
-    return " ".join([m,d,y])
+    if d is None:
+      return " ".join([m,y])
+    elif y is None:
+      return " ".join([m,d])
+    else:
+      return " ".join([m,d,y])
   else:  
-    return " ".join(['the',d,'of',m,y])
+    if d is None:
+      return " ".join([m,y])
+    elif y is None:
+      return " ".join(['the',d,'of',m])
+    else:
+      return " ".join(['the',d,'of',m,y])
 
 
 
