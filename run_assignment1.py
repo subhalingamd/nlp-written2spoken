@@ -51,6 +51,8 @@ MONTHS = ["january","february","march","april","may","june","july","august","sep
 DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
 DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
 ORDINALS = {"one": "first", "two": "second", "three": "third", "four": "fourth", "five": "fifth", "six": "sixth", "seven": "seventh", "eight": "eighth", "nine": "ninth", "ten": "tenth", "eleven": "eleventh", "twelve": "twelfth"}
+CURRENCIES = {"Re": [["rupee","rupees"],["paise","paise"]], "Rs": [["rupee","rupees"],["paise","paise"]], "₹": [["rupee","rupees"],["paise","paise"]], "$": [["dollar","dollars"],["cent","cents"]], "£": [["pound","pounds"],["penny","pence"]] ,"€": [["euro","euros"],["cent","cents"]]}
+CURRENCY_SUFFIXES = {"k": "thousand", "m": "million", "b": "billion", "tr": "trillion", "l": "lakh", "cr": "crore"}
 
 REGEX={
   "punctuation": re.compile(r"[^A-Za-z0-9]"),
@@ -77,7 +79,8 @@ REGEX={
   "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
-  "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$")
+  "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
+  "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-z .]*)$")
 }
 
 
@@ -366,12 +369,12 @@ def handle_number_spoken_as_digits(token: str) -> str:
 def is_decimal_number_only(token: str) -> bool:
   return REGEX['decimal_number_only'].match(token)  # not match space 
 
-def handle_decimal_number_only(token: str) -> str:
-  if re.match(r"^[1-9]\d\d\d$",token):  # probably a year (no comma!)
+def handle_decimal_number_only(token: str, process: bool = True) -> str:
+  if process and re.match(r"^[1-9]\d\d\d$",token):  # probably a year (no comma!)
     return handle_date__year(token)
-  elif token.startswith('0') and len(token) == 10 and ',' not in token and '.' not in token:  # probably to be read digit-wise (phone number, ...)
+  elif process and token.startswith('0') and len(token) == 10 and ',' not in token and '.' not in token:  # probably to be read digit-wise (phone number, ...)
     return handle_number_spoken_as_digits(token)
-  #elif len(token) == 10:  # phone number?
+  #elif process and len(token) == 10:  # phone number?
   #  return handle_number_spoken_as_digits(token)
   else:
     token = token.replace(",","").split(".")
@@ -445,6 +448,41 @@ def handle_mixed_fraction(token: str) -> str:
 
   return f"{w} and {f}"
 
+def is_currency(token: str) -> bool:
+  return REGEX['currency'].match(token)
+
+def handle_currency(token: str) -> str:
+  tokens = REGEX['currency'].sub(r"\1;\2;\3",token).split(";")
+  ans = []
+  unit, val, suffix = CURRENCIES[tokens[0]], tokens[1], " ".join(tokens[2:])
+  val = val.replace(" ","").replace(",","")
+
+  if suffix == "":
+    if "." in val:
+      vals = val.split(".")
+      i,f = "".join(vals[:-1]), vals[-1]
+      f = f+"0" if len(f) == 1 else f
+      ans.append(handle_number_to_words(i))
+      ans.append(unit[0][0] if int(i)==1 else unit[0][1])
+      ans.append("and")
+      ans = [] if int(i)==0 else ans
+      ans.append(handle_number_to_words(f))
+      ans.append(unit[1][0] if int(f)==1 else unit[1][1])
+      ## 0 cents ?? :: TODO
+    else:
+      ans.append(handle_number_to_words(val))
+      ans.append(unit[0][0] if int(val)==1 else unit[0][1])
+  else:
+    ans.append(handle_decimal_number_only(val, process=False))
+    for s in CURRENCY_SUFFIXES:
+      if suffix.replace(".","") == s:
+        suffix = CURRENCY_SUFFIXES[s]
+    ans.append(suffix)
+    # ans.append(unit[0][0] if int(val)==1 else unit[0][1])
+    ans.append(unit[0][1])
+
+  return " ".join(ans)
+
 def to_spoken(token: str) -> str:
   token = token.strip()
   if is_punctuation(token):
@@ -469,6 +507,8 @@ def to_spoken(token: str) -> str:
     return handle_fraction_only(token)
   elif is_mixed_fraction(token):
     return handle_mixed_fraction(token)
+  elif is_currency(token):
+    return handle_currency(token)
   else:
     return '<self>'
 
