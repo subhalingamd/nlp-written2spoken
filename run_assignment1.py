@@ -80,7 +80,7 @@ REGEX={
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
-  "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-z .]*)$")
+  "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$")
 }
 
 
@@ -454,7 +454,7 @@ def is_currency(token: str) -> bool:
 def handle_currency(token: str) -> str:
   tokens = REGEX['currency'].sub(r"\1;\2;\3",token).split(";")
   ans = []
-  unit, val, suffix = CURRENCIES[tokens[0]], tokens[1], " ".join(tokens[2:])
+  unit, val, suffix = CURRENCIES[tokens[0]], tokens[1], " ".join(tokens[2:]).lower()
   val = val.replace(" ","").replace(",","")
 
   if suffix == "":
