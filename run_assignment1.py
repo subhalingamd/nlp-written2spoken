@@ -294,13 +294,18 @@ def preprocess_date(token: str) -> str:
       return token
   elif REGEX['date_3'].match(token):
     s = REGEX['date_3'].sub(r"\1 \2 \3",token).split()
-    if int(s[1]) > 12:
-      s[0],s[1] = s[1],s[0]
-    try:
-      s[1] = MONTHS[int(s[1])-1]
-      return " ".join(s)
-    except:
-      return token
+    if int(s[0]) > 12:
+      try:
+        s[1] = MONTHS[int(s[1])-1]
+        return " ".join(s)
+      except:
+        return token
+    else:
+      try:
+        s[0] = MONTHS[int(s[0])-1]
+        return " ".join(s)
+      except:
+        return token
   else:
     return token
 
