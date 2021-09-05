@@ -53,6 +53,9 @@ DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', '
 ORDINALS = {"one": "first", "two": "second", "three": "third", "four": "fourth", "five": "fifth", "six": "sixth", "seven": "seventh", "eight": "eighth", "nine": "ninth", "ten": "tenth", "eleven": "eleventh", "twelve": "twelfth"}
 CURRENCIES = {"Re": [["rupee","rupees"],["paise","paise"]], "Rs": [["rupee","rupees"],["paise","paise"]], "₹": [["rupee","rupees"],["paise","paise"]], "$": [["dollar","dollars"],["cent","cents"]], "£": [["pound","pounds"],["penny","pence"]] ,"€": [["euro","euros"],["cent","cents"]]}
 CURRENCY_SUFFIXES = {"k": "thousand", "m": "million", "b": "billion", "tr": "trillion", "l": "lakh", "cr": "crore"}
+UNITS = {"%": ["percent","percent"], "pc": ["percent","percent"], "m": ["meter","meters"], "s": ["second","seconds"], "g": ["gram","grams"], "B": ["byte","bytes"], "b": ["bit","bits"], "mi": ["mile","miles"], "ha": ["hectare","hectares"], "hz": ["hertz","hertz"], "pm": ["p m","p m"], "am": ["a m","a m"]}
+UNITS_PREFIX = {"n": "nano", "m": "milli", "c": "centi", "k": "kilo", "K": "kilo", "M": "mega", "G": "giga", "T": "terra", "P": "peta"}
+UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square"}
 
 REGEX={
   "punctuation": re.compile(r"[^A-Za-z0-9]"),
@@ -80,7 +83,8 @@ REGEX={
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
-  "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$")
+  "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
+  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \/234\%\.²]+)$")
 }
 
 
@@ -483,6 +487,87 @@ def handle_currency(token: str) -> str:
 
   return " ".join(ans)
 
+def is_measurement(token: str) -> bool:
+  return REGEX['measurement'].match(token)
+
+def handle_measurement(token: str) -> str:
+  val, units = REGEX['measurement'].sub(r"\1;\2", token).split(";")
+  val, units = val.strip(), units.strip().replace(".","")
+  # print(f"\n{val}")
+  ans = [handle_decimal_number_only(val, process=False)]
+  units = units.split("/")
+  units_ans = []
+  FIRST_UNIT = True
+  for unit in units:
+    curr_units_ans = []
+    unit = unit.strip().split()
+    for u in unit:
+      u = u.strip()
+      if u[-1] in UNITS_SUFFIX.keys():
+        curr_units_ans.append(UNITS_SUFFIX[u[-1]])
+        u = u[:-1]
+
+      ## NOTE: `u` first to handle "p.m." case
+      if u in UNITS:
+        r = UNITS[u]
+        r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+        curr_units_ans.append(r)
+      elif u.lower() in UNITS:
+        r = UNITS[u.lower()]
+        r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]  
+        curr_units_ans.append(r)
+      elif u[0] in UNITS_PREFIX.keys():
+        p = UNITS_PREFIX[u[0]]
+        if u[1:] in UNITS:
+          r = UNITS[u[1:]]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0] 
+          curr_units_ans.append(p+r)
+        elif u[1:].lower() in UNITS:
+          r = UNITS[u[1:].lower()]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]  
+          curr_units_ans.append(p+r)
+
+        elif u in UNITS:
+          r = UNITS[u]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0] 
+          curr_units_ans.append(r)
+        elif u.lower() in UNITS:
+          r = UNITS[u.lower()]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          curr_units_ans.append(r)
+        else:
+          curr_units_ans.append(u)
+      elif u[0].lower() in UNITS_PREFIX.keys():
+        p = UNITS_PREFIX[u[0].lower()]
+        if u[1:] in UNITS:
+          r = UNITS[u[1:]]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          curr_units_ans.append(p+r)
+        elif u[1:].lower() in UNITS:
+          r = UNITS[u[1:].lower()]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          curr_units_ans.append(p+r)
+        
+        elif u in UNITS:
+          r = UNITS[u]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          curr_units_ans.append(r)
+        elif u.lower() in UNITS:
+          r = UNITS[u.lower()]
+          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          curr_units_ans.append(r)
+        else:
+          curr_units_ans.append(u)
+
+      else:
+        curr_units_ans.append(u)
+      # print(curr_units_ans)
+    units_ans.append(" ".join(curr_units_ans))
+    FIRST_UNIT = False if len(units_ans)>0 and units_ans[0]!="" else True
+  # print(units_ans)
+  ans.append(" per ".join(units_ans))
+  return re.sub(r"\s{2,}", " " , " ".join(ans))
+
 def to_spoken(token: str) -> str:
   token = token.strip()
   if is_punctuation(token):
@@ -509,6 +594,8 @@ def to_spoken(token: str) -> str:
     return handle_mixed_fraction(token)
   elif is_currency(token):
     return handle_currency(token)
+  elif is_measurement(token):
+    return handle_measurement(token)
   else:
     return '<self>'
 
