@@ -426,7 +426,7 @@ def handle_fraction_only(token: str) -> str:
   if d == "2":
     d = "half"
   elif d == "4":
-    d = "quater"
+    d = "quarter"
   else:
     d = handle_ordinal_number(d, process=False)
 
