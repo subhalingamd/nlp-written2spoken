@@ -20,6 +20,16 @@ def test_abbreviation():
 	assert to_spoken("F") == "<self>"
 	assert to_spoken("ISBN") == "i s b n"
 
+	assert to_spoken("am") == "<self>"
+	#assert to_spoken("TheraCoat") == "<self>"
+
+	assert to_spoken("IISc.") == "i i s c"
+	assert to_spoken("a.m.") == "a m"
+	
+	assert to_spoken("IITs") == "i i t s"
+
+	assert to_spoken("US-") == "u s"
+
 def test_time():
 	assert to_spoken("9:00") == "nine"
 	assert to_spoken("10:05") == "ten five"
@@ -60,9 +70,9 @@ def test_preprocess_date():
 	assert preprocess_date("31 January 1900") == "31 january 1900"
 	assert preprocess_date("6th July 2021") == "6 july 2021"
 	assert preprocess_date("14 th February, 2020") == "14 february 2020"
-	assert preprocess_date("August 20, 2020") == "20 august 2020"
-	assert preprocess_date("May 21st, 1854") == "21 may 1854"
-	assert preprocess_date("July 20  , '20") == "20 july '20"
+	assert preprocess_date("August 20, 2020") == "august 20 2020"
+	assert preprocess_date("May 21st, 1854") == "may 21 1854"
+	assert preprocess_date("July 20  , '20") == "july 20 '20"
 
 	assert preprocess_date("11 Dec., 2010") == "11 december 2010"
 	assert preprocess_date("10.Nov.1893") == "10 november 1893"
@@ -70,28 +80,48 @@ def test_preprocess_date():
 	assert preprocess_date("7th Jun, 1987") == "7 june 1987"
 	assert preprocess_date("15th.Aug.1947") == "15 august 1947"
 
-	assert preprocess_date("Jun 1st, 2012") == "1 june 2012"
-	assert preprocess_date("Mar. 3rd 2009") == "3 march 2009"
-	assert preprocess_date("Jan.26.1950") == "26 january 1950"
-	assert preprocess_date("Apr.13th.1908") == "13 april 1908"
+	assert preprocess_date("Jun 1st, 2012") == "june 1 2012"
+	assert preprocess_date("Mar. 3rd 2009") == "march 3 2009"
+	assert preprocess_date("Jan.26.1950") == "january 26 1950"
+	assert preprocess_date("Apr.13th.1908") == "april 13 1908"
 
 	assert preprocess_date("2004-03-01") == "01 march 2004"
 	assert preprocess_date("2004/03.01") == "01 march 2004"
 	assert preprocess_date("2004 / 3 / 1") == "1 march 2004"
 	assert preprocess_date("2004 / 31 / 1") == "31 january 2004"
 
-	assert preprocess_date("01-03-1956") == "01 march 1956"
-	assert preprocess_date("1/03.1956") == "1 march 1956"
-	assert preprocess_date("1 / 3 / 1956") == "1 march 1956"
-	assert preprocess_date("01 / 31 / 1956") == "31 january 1956"
+	assert preprocess_date("01-03-1956") == "january 03 1956"
+	assert preprocess_date("1/03.1956") == "january 03 1956"
+	assert preprocess_date("1 / 3 / 1956") == "january 3 1956"
+	assert preprocess_date("31 / 01 / 1956") == "31 january 1956"
+	assert preprocess_date("13-32-1956") == "13-32-1956"
+	assert preprocess_date("12-32-1956") == "december 32 1956"
 
 
 	assert preprocess_date("1st September 900") == "1 september 900"
 	assert preprocess_date("1 Sept., 900") == "1 september 900"
-	assert preprocess_date("September 1st, 900") == "1 september 900"
-	assert preprocess_date("Sept 1, 900") == "1 september 900"
+	assert preprocess_date("September 1st, 900") == "september 1 900"
+	assert preprocess_date("Sept 1, 900") == "september 1 900"
 	assert preprocess_date("900-9-1") == "1 september 900"
-	assert preprocess_date("1.9.900") == "1 september 900"
+	assert preprocess_date("1.9.900") == "january 9 900"
+
+	assert preprocess_date("September, 2000") == "00 september 2000"
+	assert preprocess_date("Jul., 2014") == "00 july 2014"
+
+	assert preprocess_date("9th August") == "9 august 0000"
+	assert preprocess_date("March 9") == "march 9 0000"
+	assert preprocess_date("March 9th") == "march 9 0000"
+	assert preprocess_date("21st Dec.") == "21 december 0000"
+	assert preprocess_date("Oct. 05") == "october 05 0000"
+	assert preprocess_date("Oct 3rd") == "october 3 0000"
+
+	#assert preprocess_date("08 / 2000") == "00 august 2000"
+	assert preprocess_date("08-2000") == "00 august 2000"
+	assert preprocess_date("14-2099") == "14-2099"
+	#assert preprocess_date("9/11") == "september 11 0000"
+	assert preprocess_date("9-11") == "september 11 0000"
+	assert preprocess_date("26-10") == "26 october 0000"
+	assert preprocess_date("26-14") == "26-14"
 
 
 def test_handle_date__year():
@@ -115,15 +145,27 @@ def test_handle_date__year():
 
 def test_handle_date():
 	assert to_spoken("14th February 2000") == "the fourteenth of february two thousand"
-	assert to_spoken("Oct. 2, 1950") == "the second of october nineteen fifty"
+	assert to_spoken("Oct. 2, 1950") == "october second nineteen fifty"
+	assert to_spoken("May 29, 2013") == "may twenty ninth twenty thirteen"
+	assert to_spoken("January 14, 2008") == "january fourteenth two thousand eight"
+	#assert to_spoken("January, 2008") == "january two thousand eight"
 	assert to_spoken("2009-11-08") == "the eighth of november two thousand nine"
-	assert to_spoken("1|5|1907") == "the first of may nineteen o seven"
+	assert to_spoken("1|5|1907") == "january fifth nineteen o seven"
 
 	assert handle_date("2008-13-21") == handle_number_spoken_as_digits("2008-13-21") == to_spoken("2008-13-21") == "two o o eight sil one three sil two one"
 	assert handle_date("21/13/2008") == handle_number_spoken_as_digits("21/13/2008") == to_spoken("21/13/2008") == "two one sil one three sil two o o eight"
 	
+	assert to_spoken("March 2011") == "march twenty eleven"
+	assert to_spoken("Jun. 2005") == "june two thousand five"
+	assert to_spoken("August 17") == "august seventeenth"
+
+	assert to_spoken("08 - 2000") == "august two thousand"
+	assert to_spoken("14-2099") == "one four sil two o nine nine"
+	assert to_spoken("9-11") == "september eleventh"
+	assert to_spoken("26-10") == "the twenty sixth of october"
+	assert to_spoken("26-14") == "two six sil one four"
+
 	## TODO::
-	# assert to_spoken("21 janu 2008") == "two one sil two o o eight"
 	assert to_spoken("21 janu 2008") == "<self>"
 
 def test_is_number_spoken_as_digits():
@@ -201,7 +243,7 @@ def test_is_fraction_only():
 
 def test_handle_fraction_only():
 	assert handle_fraction_only("1/2") == to_spoken("1/2") == "one half" ## check TODO
-	assert handle_fraction_only("3/4") == to_spoken("3/4") == "three quaters"
+	assert handle_fraction_only("3/4") == to_spoken("3/4") == "three quarters"
 	assert handle_fraction_only("2/3") == to_spoken("2/3") == "two thirds"
 	assert handle_fraction_only("1/10") == to_spoken("1/10") == "one tenth"
 	assert handle_fraction_only("917/20") == to_spoken("917/20") == "nine hundred seventeen twentieths"
@@ -214,3 +256,81 @@ def test_handle_mixed_fraction():
 	assert handle_mixed_fraction("1 1/2") == to_spoken("1 1/2") == "one and a half"
 	assert handle_mixed_fraction("2 1/8") == to_spoken("2 1/8") == "two and an eighth"
 
+
+def test_is_currency():
+	assert is_currency("€5.7 million") is not None
+	assert is_currency("$10 million") is not None
+	assert is_currency("Re. 1 . 00") is not None
+	assert is_currency("Rs 1, 000.56") is not None
+	assert is_currency("$15 million") is not None
+	assert is_currency("$ 1.2m") is not None
+	assert is_currency("Rs 1,234 cr") is not None
+
+	assert is_currency("$250M") is not None
+
+def test_handle_currency():
+	assert handle_currency("$1") == "one dollar" == to_spoken("$1")
+	assert handle_currency("$ 1 . 01") == "one dollar and one cent" == to_spoken("$ 1 . 01")
+	assert handle_currency("$0. 11") == "eleven cents" == to_spoken("$0. 11")
+	assert handle_currency("€ 2020") == "two thousand twenty euros" == to_spoken("€ 2020")
+	assert handle_currency("€  1 m") == "one million euros" == to_spoken("€  1 m")
+
+	assert handle_currency("£ 1.12k") == "one point one two thousand pounds" == to_spoken("£ 1.12k")
+	assert handle_currency("£ 1.40") == "one pound and forty pence" == to_spoken("£ 1.40")
+	assert handle_currency("Rs. 15crore") == "fifteen crore rupees" == to_spoken("Rs. 15crore")
+	assert handle_currency("Rs. 1,000.20") == "one thousand rupees and twenty paise" == to_spoken("Rs. 1,000.20")
+
+	assert handle_currency("$ 1.1") == "one dollar and ten cents" == to_spoken("$ 1.1")
+	assert handle_currency("$ 1.0") == "one dollar and zero cents" == to_spoken("$ 1.0")
+
+	assert handle_currency("€5.7 million") == "five point seven million euros" == to_spoken("€5.7 million")
+	assert handle_currency("$39,844") == "thirty nine thousand eight hundred forty four dollars" == to_spoken("$39,844")
+	assert handle_currency("$900,000") == "nine hundred thousand dollars" == to_spoken("$900,000")
+	assert handle_currency("$1.2 million") == "one point two million dollars" == to_spoken("$1.2 million")
+	assert handle_currency("Rs 1,000 cr") == "one thousand crore rupees" == to_spoken("Rs 1,000 cr")
+	
+	assert handle_currency("$250M") == "two hundred fifty million dollars" == to_spoken("$250M")
+
+
+def test_is_year_with_s():
+	assert is_year_with_s("1940s") is not None
+	assert is_year_with_s("1941st") is None
+
+def test_handle_year_with_s():
+	assert handle_year_with_s("1940s") == to_spoken("1940s") == "nineteen forties"
+	assert handle_year_with_s("1900s") == to_spoken("1900s") == "nineteen hundreds"
+
+
+def test_is_measurement():
+	assert is_measurement("0.22%") is not None
+	assert is_measurement("15 m") is not None
+	assert is_measurement("604.2 /km²") is not None
+	assert is_measurement("1,570 mm") is not None
+	assert is_measurement("100Gb/s") is not None
+	assert is_measurement("1 percent") is not None
+
+def test_handle_measurement():
+	assert handle_measurement("57 percent") == "fifty seven percent" == to_spoken("57 percent")
+	assert handle_measurement("99.05%") == "ninety nine point o five percent" == to_spoken("99.05%")
+	assert handle_measurement("7/km²") == "seven per square kilometers" == to_spoken("7/km²")
+	assert handle_measurement("1,908 mi") == "one thousand nine hundred eight miles" == to_spoken("1,908 mi")
+	assert handle_measurement("179.4 / km2 ") == "one hundred seventy nine point four per square kilometers" == to_spoken("179.4 / km2 ")
+	assert handle_measurement("9 PM") == "nine p m" == to_spoken("9 PM")
+	assert handle_measurement("8 a.m.") == "eight a m" == to_spoken("8 a.m. ")
+	assert handle_measurement("11 cm") == "eleven centimeters" == to_spoken("11 cm")
+	assert handle_measurement("1,047ha ") == "one thousand forty seven hectares" == to_spoken("1,047ha ")
+	assert handle_measurement("7.5KB") == "seven point five kilobytes" == to_spoken("7.5KB")
+	assert handle_measurement("100Gb/s") == "one hundred gigabits per second" == to_spoken("100Gb/s")
+	assert handle_measurement("3,070 km") == "three thousand seventy kilometers" == to_spoken("3,070 km")
+	assert handle_measurement("11 m") == "eleven meters" == to_spoken("11 m")
+	assert handle_measurement("101 s") == "one hundred one seconds" == to_spoken("101 s")
+	assert handle_measurement("101 kHz") == "one hundred one kilohertz" == to_spoken("101 kHz")
+	assert handle_measurement("101 KHz") == "one hundred one kilohertz" == to_spoken("101 KHz")
+
+
+def test_plus_minus():
+	assert to_spoken("- 3/5") == "minus three fifths"
+	assert to_spoken("- 2,020") == "minus two thousand twenty"
+	# assert to_spoken("- 2020") == "minus two thousand twenty"
+	assert to_spoken("-4 3/5") == "minus four and three fifths"
+	assert to_spoken(" +3.14") == "plus three point one four"
