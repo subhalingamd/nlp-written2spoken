@@ -86,6 +86,7 @@ REGEX={
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
   "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
+  "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"), # TODO:: maybe accept only YYYYs => others "seconds"?
   "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \/234\%\.²]+)$")
 }
 
@@ -516,6 +517,18 @@ def handle_currency(token: str) -> str:
 
   return " ".join(ans)
 
+def is_year_with_s(token: str) -> bool:
+  return REGEX['year_with_s'].match(token)
+
+def handle_year_with_s(token: str) -> str:
+  token = REGEX['year_with_s'].sub(r"\1",token)
+  token = handle_date__year(token)
+  if token[-1] == "y":
+    token = token[:-1] + "ies"
+  else:
+    token = token + "s"
+  return token
+
 def is_measurement(token: str) -> bool:
   return REGEX['measurement'].match(token)
 
@@ -623,6 +636,8 @@ def to_spoken(token: str) -> str:
     return handle_mixed_fraction(token)
   elif is_currency(token):
     return handle_currency(token)
+  elif is_year_with_s(token):
+    return handle_year_with_s(token)
   elif is_measurement(token):
     return handle_measurement(token)
   else:
