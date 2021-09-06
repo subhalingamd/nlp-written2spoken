@@ -579,7 +579,7 @@ def handle_measurement(token: str) -> str:
           r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(r)
         else:
-          curr_units_ans.append(u)
+          curr_units_ans.append(u.lower())
       elif u[0].lower() in UNITS_PREFIX.keys():
         p = UNITS_PREFIX[u[0].lower()]
         if u[1:] in UNITS:
@@ -600,10 +600,10 @@ def handle_measurement(token: str) -> str:
           r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(r)
         else:
-          curr_units_ans.append(u)
+          curr_units_ans.append(u.lower())
 
       else:
-        curr_units_ans.append(u)
+        curr_units_ans.append(u.lower())
       # print(curr_units_ans)
     units_ans.append(" ".join(curr_units_ans))
     FIRST_UNIT = False if len(units_ans)>0 and units_ans[0]!="" else True
