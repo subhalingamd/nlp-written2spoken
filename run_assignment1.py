@@ -31,7 +31,7 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if not re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z ]{1,}$",ii):
       #if re.match(r"^[A-Z]{1,}$",ii) and re.match(r"^[A-Z][A-Z. ]{0,}$",ii):
       #if REGEX["roman"].match(ii):
-      if re.match(r"[0-9]",ii) and not re.match(r"^[0-9\.\,]+$", ii.strip()):
+      #if re.match(r"[0-9]",ii) and not re.match(r"^[0-9\.\,]+$", ii.strip()):
       #if re.match(r"\d+\s*:\s*\d+",ii):
       #if re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
       #if re.match(r"\d",ii) and not re.match(r"[012]{0,1}[0-9]\s*:\s*[0-5][0-9]",ii):
@@ -40,7 +40,8 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
       #if not re.match(r"[^A-Z0-9]",ii) and re.match(r"^[0-9\.\,]+$", ii.strip()):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
-        print(ii,"\t:\t",oo)
+        #print(ii,"\t:\t",oo)
+        print(ii,"\t:\t",oo) if oo not in ["<self>"] else None
 
 
 
