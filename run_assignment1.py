@@ -652,6 +652,22 @@ def to_spoken(token: str) -> str:
     return handle_year_with_s(token)
   elif is_measurement(token):
     return handle_measurement(token)
+  elif token[0] == "-":
+    rec = to_spoken(token[1:])
+    if rec == "<self>":
+      return "<self>"
+    elif rec == "sil":
+      return "sil"
+    else:
+      return "minus " + rec     
+  elif token[0] == "+":
+    rec = to_spoken(token[1:])
+    if rec == "<self>":
+      return "<self>"
+    elif rec == "sil":
+      return "sil"
+    else:
+      return "plus " + rec
   else:
     return '<self>'
 
