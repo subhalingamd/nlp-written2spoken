@@ -21,22 +21,28 @@ def test_abbreviation():
 	assert to_spoken("ISBN") == "i s b n"
 
 	assert to_spoken("am") == "<self>"
-	#assert to_spoken("TheraCoat") == "<self>"
+	assert to_spoken("AlphaZeta") == "<self>"
 
 	assert to_spoken("IISc.") == "i i s c"
 	assert to_spoken("a.m.") == "a m"
 	
-	assert to_spoken("IITs") == "i i t s"
+	assert to_spoken("IIT") == "i i t"
+	
+	assert to_spoken("asCII") == "a s c i i"
+	assert to_spoken("It") == "<self>"
 
 	assert to_spoken("US-") == "u s"
+	assert to_spoken("IITs") == "i i t's"
 
 def test_time():
-	assert to_spoken("9:00") == "nine"
+	assert to_spoken("00:00") == "zero hundred"
+	assert to_spoken("9:00") == "nine o'clock"
 	assert to_spoken("10:05") == "ten five"
 	assert to_spoken("11:30") == "eleven thirty"
-	assert to_spoken("12:00") == "twelve"
+	assert to_spoken("12:00") == "twelve o'clock"
 	assert to_spoken("19:00") == "nineteen hundred"
 	assert to_spoken("06:00pm") == "six p m"
+	assert to_spoken("06:00p m.") == "six p m"
 	assert to_spoken("12:30p.m.") == "twelve thirty p m"
 	assert to_spoken("1:00 am") == "one a m"
 	assert to_spoken("02:00 a.m.") == "two a m"
@@ -44,7 +50,7 @@ def test_time():
 	assert to_spoken("04:30 P.M. IST") == "four thirty p m i s t"
 	assert to_spoken("20:30 hrs") == "twenty thirty hours"
 	assert to_spoken("6:00 hrs IST") == "six hundred hours i s t"
-	assert to_spoken("7:00 hrs. IST") == "seven hundred hours i s t"
+	assert to_spoken("7:00hrs. IST") == "seven hundred hours i s t"
 
 	assert to_spoken("6:00:00") == "six hours zero minutes and zero seconds"
 	assert to_spoken("6:20:56") == "six hours twenty minutes and fifty six seconds"
@@ -230,6 +236,7 @@ def test_handle_ordinal_number():
 	assert handle_ordinal_number("50th") == to_spoken("50th") == "fiftieth"
 	assert handle_ordinal_number("11th") == to_spoken("11th") == "eleventh"
 	assert handle_ordinal_number("12") == "twelfth"
+	assert handle_ordinal_number("28") == "twenty eighth"
 	assert handle_ordinal_number("1,805th") == to_spoken("1,805th") == "one thousand eight hundred fifth"
 	assert handle_ordinal_number("1859") == "eighteen fifty ninth"
 
@@ -324,8 +331,13 @@ def test_handle_measurement():
 	assert handle_measurement("3,070 km") == "three thousand seventy kilometers" == to_spoken("3,070 km")
 	assert handle_measurement("11 m") == "eleven meters" == to_spoken("11 m")
 	assert handle_measurement("101 s") == "one hundred one seconds" == to_spoken("101 s")
-	assert handle_measurement("101 kHz") == "one hundred one kilohertz" == to_spoken("101 kHz")
+	assert handle_measurement("101ms") == "one hundred one milliseconds" == to_spoken("101 ms")
+	assert handle_measurement("44.1 kHz") == "forty four point one kilohertz" == to_spoken("44.1 kHz")
 	assert handle_measurement("101 KHz") == "one hundred one kilohertz" == to_spoken("101 KHz")
+
+	assert handle_measurement("9.8 m / s2") == "nine point eight meters per square second" == to_spoken("9.8 m / s2")
+	assert handle_measurement("1.23 kg m") == "one point two three kilograms meters" == to_spoken("1.23 kg m")
+	assert handle_measurement("1 Newton /s") == "one newton per second" == to_spoken("1 Newton /s")
 
 
 def test_plus_minus():
