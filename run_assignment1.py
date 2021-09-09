@@ -223,9 +223,12 @@ def handle_time(token: str) -> str:
     token.extend(['hours and', handle_number_to_words(times[1]), 'minutes'])
   else:
     if times[1] == "00":
-      if int(times[0]) > 12:  # adding "hundred" if min == "00"  :: TODO
-      #if len(tokens) <= 1 or tokens[1].lower().replace(".","") not in ["am","pm"]:  # if no am/pm
+      if int(times[0]) > 12 or int(times[0]) == 0:  # adding "hundred" if min == "00"  :: TODO
         token.append("hundred")
+      elif "hr" in "".join(tokens).lower().replace(".",""):
+        token.append("hundred")
+      elif "am" not in "".join(tokens).lower().replace(".","") and "pm" not in "".join(tokens).lower().replace(".",""):
+        token.append("o'clock")
     else:
       token.append(handle_number_to_words(times[1]))
 
