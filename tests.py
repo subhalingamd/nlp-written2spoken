@@ -334,6 +334,9 @@ def test_handle_measurement():
 	assert handle_measurement("101ms") == "one hundred one milliseconds" == to_spoken("101 ms")
 	assert handle_measurement("44.1 kHz") == "forty four point one kilohertz" == to_spoken("44.1 kHz")
 	assert handle_measurement("101 KHz") == "one hundred one kilohertz" == to_spoken("101 KHz")
+	assert handle_measurement("40°C") == "forty degrees celsius" == to_spoken("40°C")
+	assert handle_measurement("1,500 K") == "one thousand five hundred kelvins" == to_spoken("1,500 K")
+	assert handle_measurement("101 cu. cm") == "one hundred one cubic centimeters" == to_spoken("101 cu. cm")
 
 	assert handle_measurement("9.8 m / s2") == "nine point eight meters per square second" == to_spoken("9.8 m / s2")
 	assert handle_measurement("1.23 kg m") == "one point two three kilograms meters" == to_spoken("1.23 kg m")
