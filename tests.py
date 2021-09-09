@@ -349,3 +349,27 @@ def test_plus_minus():
 	# assert to_spoken("- 2020") == "minus two thousand twenty"
 	assert to_spoken("-4 3/5") == "minus four and three fifths"
 	assert to_spoken(" +3.14") == "plus three point one four"
+
+
+
+def test_assignment_examples():
+	assert to_spoken("U.S") == "u s" == to_spoken("US")
+	
+	assert to_spoken("29 March 2012") == "the twenty ninth of march twenty twelve"
+	assert to_spoken("2011-01-25") == "the twenty fifth of january twenty eleven"
+
+	assert to_spoken("04:40 PM") == "four forty p m"
+	assert to_spoken("21:30:12") == "twenty one hours thirty minutes and twelve seconds"
+
+	assert to_spoken("10345") == "ten thousand three hundred forty five"
+	assert to_spoken("24349943") == "twenty four million three hundred forty nine thousand nine hundred forty three"
+	assert to_spoken("184.33") == "one hundred eighty four point three three"
+	assert to_spoken("-20") == "minus twenty"
+
+	assert to_spoken("53.77 mm") == "fifty three point seven seven millimeters"
+	assert to_spoken("3 mA") == "three milliamperes"
+	assert to_spoken("14 sq m") == "fourteen square meters"
+
+	assert to_spoken("$15.24") == "fifteen dollars and twenty four cents"
+	assert to_spoken("£11") == "eleven pounds"
+
