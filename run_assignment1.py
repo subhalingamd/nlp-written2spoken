@@ -39,6 +39,7 @@ def analyze(in_path: str,gold_path: str) -> None:
       #if re.match(r"^\d\d\d\d[\/\-\.]\d\d[\/\-\.]\d\d$",ii):
       #if re.match(r"\(?\d+[\-\( ]+\d+" , ii):
       #if not re.match(r"[^A-Z0-9]",ii) and re.match(r"^[0-9\.\,]+$", ii.strip()):
+      #if is_abbreviation(ii):
         #ii = re.sub(r"([012]{0,1}[0-9])\s*:\s*([0-5][0-9])",r" \1:\2 ",ii).strip()
         #print(ii,"\t:\t",oo)
         print(ii,"\t:\t",oo) if oo not in ["<self>"] else None
