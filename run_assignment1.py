@@ -63,7 +63,7 @@ REGEX={
   "punctuation": re.compile(r"[^A-Za-z0-9]"),
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
   "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
-  "abbreviation": re.compile(r"^[A-Z][A-Z. ]{0,}$"),
+  "abbreviation": re.compile(r"^(?:(?:[A-Z]\.?)|(?:[A-Z]+[A-Za-z .]*[A-Z]+[A-Za-z .]*)|(?:[a-z .]+[A-Z]+[A-Za-z .]*)|(?:(?:[a-z]+\.+\s*)+))\-?$"),
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]"),
 
   "date__wo_date": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s+((?:\'|\d?\d)\d\d)$"),
@@ -193,10 +193,17 @@ def handle_roman_to_numeral(token: str) -> str:
 
 
 def is_abbreviation(token: str) -> bool:
-  return len(token)>1 and REGEX['abbreviation'].match(token);
+  upper_lower = 0         # In abbreviations, upper>lower (observation)
+  for ch in token:
+    if ch.isupper():
+      upper_lower+=1
+    elif ch.islower():
+      upper_lower-=1
+  return len(token)>1 and ('.' in token or token.endswith("-") or upper_lower>0) and REGEX['abbreviation'].match(token);
 
 def handle_abbreviation(token: str) -> str:
-  return " ".join(list(token.replace(".","").replace(" ","").lower()))
+  ans = " ".join(list(token.replace(".","").replace("-","").replace(" ","").lower()))
+  return ans if not token.endswith("s") else ans[:-2]+"'"+ans[-1]
 
 
 def is_time(token: str) -> bool:
