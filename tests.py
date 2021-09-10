@@ -341,6 +341,8 @@ def test_handle_measurement():
 	assert handle_measurement("101 cu. cm") == "one hundred one cubic centimeters" == to_spoken("101 cu. cm")
 
 	assert handle_measurement("9.8 m / s2") == "nine point eight meters per square second" == to_spoken("9.8 m / s2")
+	assert handle_measurement("1000 kg/m³") == "one thousand kilograms per cubic meter" == to_spoken("1000 kg/m³")
+	assert handle_measurement("1g/l") == "one gram per liter" == to_spoken("1g/l")
 	assert handle_measurement("1.23 kg m") == "one point two three kilograms meters" == to_spoken("1.23 kg m")
 	assert handle_measurement("1 Newton /s") == "one newton per second" == to_spoken("1 Newton /s")
 

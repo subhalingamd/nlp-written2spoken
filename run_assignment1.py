@@ -55,9 +55,9 @@ DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', '
 ORDINALS = {"one": "first", "two": "second", "three": "third", "five": "fifth", "eight": "eighth", "nine": "ninth", "twelve": "twelfth"}
 CURRENCIES = {"Re": [["rupee","rupees"],["paise","paise"]], "Rs": [["rupee","rupees"],["paise","paise"]], "₹": [["rupee","rupees"],["paise","paise"]], "$": [["dollar","dollars"],["cent","cents"]], "£": [["pound","pounds"],["penny","pence"]] ,"€": [["euro","euros"],["cent","cents"]]}
 CURRENCY_SUFFIXES = {"k": "thousand", "m": "million", "b": "billion", "tr": "trillion", "l": "lakh", "cr": "crore"}
-UNITS = {"%": ["percent","percent"], "pc": ["percent","percent"], "m": ["meter","meters"], "s": ["second","seconds"], "g": ["gram","grams"], "A": ["ampere","amperes"], "mol": ["mole","moles"], "mole": ["mole","moles"], "K": ["kelvin","kelvins"], "cd": ["candela","candelas"], "°": ["degree","degrees"], "°C": ["degree celsius","degrees celsius"], "°F": ["degree fahrenheit","degrees fahrenheit"], "V": ["volt","volts"], "W": ["watt","watts"], "N": ["newton","newtons"], "B": ["byte","bytes"], "b": ["bit","bits"], "mi": ["mile","miles"], "ha": ["hectare","hectares"], "hz": ["hertz","hertz"], "pm": ["p m","p m"], "am": ["a m","a m"], "sq": ["square","square"], "cu": ["cubic","cubic"]}
+UNITS = {"%": ["percent","percent"], "pc": ["percent","percent"], "m": ["meter","meters"], "s": ["second","seconds"], "g": ["gram","grams"], "A": ["ampere","amperes"], "mol": ["mole","moles"], "mole": ["mole","moles"], "K": ["kelvin","kelvins"], "cd": ["candela","candelas"], "°": ["degree","degrees"], "°C": ["degree celsius","degrees celsius"], "°F": ["degree fahrenheit","degrees fahrenheit"], "V": ["volt","volts"], "W": ["watt","watts"], "N": ["newton","newtons"], "Pa": ["pascal","pascals"], "l": ["liter","liters"], "B": ["byte","bytes"], "b": ["bit","bits"], "mi": ["mile","miles"], "ha": ["hectare","hectares"], "hz": ["hertz","hertz"], "pm": ["p m","p m"], "am": ["a m","a m"], "sq": ["square","square"], "cu": ["cubic","cubic"]}
 UNITS_PREFIX = {"n": "nano", "m": "milli", "c": "centi", "k": "kilo", "K": "kilo", "M": "mega", "G": "giga", "T": "terra", "P": "peta"}
-UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square"}
+UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square", "³": "cubic"}
 
 REGEX={
   "punctuation": re.compile(r"[^A-Za-z0-9]"),
@@ -89,7 +89,7 @@ REGEX={
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
   "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
   "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"), # TODO:: maybe accept only YYYYs => others "seconds"?
-  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \/234\%\.\°²]+)$")
+  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \/234\%\.\°²³]+)$")
 }
 
 
@@ -548,7 +548,7 @@ def is_measurement(token: str) -> bool:
 
 def handle_measurement(token: str) -> str:
   val, units = REGEX['measurement'].sub(r"\1;\2", token).split(";")
-  val, units = val.strip(), units.strip().replace(".","")
+  val, units = val.strip().replace(",",""), units.strip().replace(".","")
   # print(f"\n{val}")
   ans = [handle_decimal_number_only(val, process=False)]
   units = units.split("/")
@@ -566,30 +566,30 @@ def handle_measurement(token: str) -> str:
       ## NOTE: `u` first to handle "p.m." case
       if u in UNITS:
         r = UNITS[u]
-        r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+        r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
         curr_units_ans.append(r)
       elif u.lower() in UNITS:
         r = UNITS[u.lower()]
-        r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]  
+        r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]  
         curr_units_ans.append(r)
       elif u[0] in UNITS_PREFIX.keys():
         p = UNITS_PREFIX[u[0]]
         if u[1:] in UNITS:
           r = UNITS[u[1:]]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0] 
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0] 
           curr_units_ans.append(p+r)
         elif u[1:].lower() in UNITS:
           r = UNITS[u[1:].lower()]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]  
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]  
           curr_units_ans.append(p+r)
 
         elif u in UNITS:
           r = UNITS[u]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0] 
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0] 
           curr_units_ans.append(r)
         elif u.lower() in UNITS:
           r = UNITS[u.lower()]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(r)
         else:
           curr_units_ans.append(u.lower())
@@ -597,20 +597,20 @@ def handle_measurement(token: str) -> str:
         p = UNITS_PREFIX[u[0].lower()]
         if u[1:] in UNITS:
           r = UNITS[u[1:]]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(p+r)
         elif u[1:].lower() in UNITS:
           r = UNITS[u[1:].lower()]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(p+r)
         
         elif u in UNITS:
           r = UNITS[u]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(r)
         elif u.lower() in UNITS:
           r = UNITS[u.lower()]
-          r = (r[0] if val==1 else r[1]) if FIRST_UNIT else r[0]
+          r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
           curr_units_ans.append(r)
         else:
           curr_units_ans.append(u.lower())
