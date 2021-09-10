@@ -442,14 +442,14 @@ def handle_ordinal_number(token: str, process: bool = True) -> str:
   else:
     token = handle_number_to_words(token)
   tokens = token.split()
-  suffixed = tokens[-1]
+  last = tokens[-1]
   try:
-      suffixed = ORDINALS[suffixed]
+      last = ORDINALS[last]
   except KeyError:
-      if suffixed[-1] == "y":
-          suffixed = suffixed[:-1] + "ie"
-      suffixed += "th"
-  tokens[-1] = suffixed
+      if last[-1] == "y":
+          last = last[:-1] + "ie"
+      last += "th"
+  tokens[-1] = last
   return " ".join(tokens)
 
 
