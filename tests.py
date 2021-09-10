@@ -207,8 +207,10 @@ def test_handle_decimal_number_only():
 
 
 	assert handle_decimal_number_only("62.0") == to_spoken("62.0") == "sixty two point zero"
+	assert handle_decimal_number_only("62.") == to_spoken("62.") == "sixty two point"
 	assert handle_decimal_number_only("1,565.0") == to_spoken("1,565.0") == "one thousand five hundred sixty five point zero"
 	assert handle_decimal_number_only("0.88") == to_spoken("0.88") == "zero point eight eight"
+	assert handle_decimal_number_only(".88") == to_spoken(".88") == "point eight eight"
 
 	assert handle_decimal_number_only("12,000") == to_spoken("12,000") == "twelve thousand"
 	assert handle_decimal_number_only("3.14") == to_spoken("3.14") == "three point one four"

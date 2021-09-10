@@ -83,7 +83,7 @@ REGEX={
   "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
 
   "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\(\) ]+\s*\d+\s*[0-9\-\(\) ]*$"),
-  "decimal_number_only": re.compile(r"^[0-9\.\,]+$"),   # space? :: TODO
+  "decimal_number_only": re.compile(r"^(?:(?:\d[0-9\,]*(\.\d*)?)|(?:\.\d+))$"),   # space? :: TODO
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
@@ -424,13 +424,15 @@ def handle_decimal_number_only(token: str, process: bool = True) -> str:
   #  return handle_number_spoken_as_digits(token)
   else:
     token = token.replace(",","").split(".")
-    ans = handle_number_to_words(token[0])
+    ans = []
+    ans.append(handle_number_to_words(token[0])) if token[0] != "" else None
     if len(token) > 1:
+      ans.append("point")
       if token[1] == "0":
-        ans+= " point zero"
-      else:
-        ans+= " point " + handle_number_spoken_as_digits(token[1])
-    return ans
+        ans.append("zero")
+      elif token[1] != "":
+        ans.append(handle_number_spoken_as_digits(token[1]))
+    return " ".join(ans)
 
 def is_ordinal_number(token: str) -> bool:
   return REGEX['ordinal_number'].match(token.lower())
