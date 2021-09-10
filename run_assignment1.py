@@ -93,79 +93,64 @@ REGEX={
 }
 
 
-def handle_number_to_words(token: str) -> bool:
+def handle_number_to_words(token: str) -> str:
   # Adapted from: https://www.codesansar.com/python-programming-examples/number-words-conversion-no-library-used.htm
 
-  # Main Logic
-  ones = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
-  twos = ('ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
-  tens = ('twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred')
+  ones = ('zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen')
+  tens = ('', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred')
   suffixes = ('', 'thousand', 'million', 'billion', 'trillion', 'quadrillion')
 
-  def process(number, index):
-      
-      if number=='0':
-          return 'zero'
-      
-      length = len(number)
-      
-      if(length > 3):
-          return False
-      
-      number = number.zfill(3)
-      words = ''
-   
-      hdigit = int(number[0])
-      tdigit = int(number[1])
-      odigit = int(number[2])
-      
-      words += '' if number[0] == '0' else ones[hdigit]
-      words += ' hundred ' if not words == '' else ''
-      
-      if(tdigit > 1):
-          words += tens[tdigit - 2]
-          words += ' '
-          words += ones[odigit]
-      
-      elif(tdigit == 1):
-          words += twos[(int(tdigit + odigit) % 10) - 1]
-          
-      elif(tdigit == 0):
-          words += ones[odigit]
+  def process(num: str, idx: int) -> str:
 
-      if(words.endswith('zero')):
-          words = words[:-len('zero')]
-      else:
-          words += ' '
-       
-      if(not len(words) == 0):    
-          words += suffixes[index]
-          
-      return words;
-      
-  def getWords(number):
-      length = len(str(number))
-      
-      if length>18: # cannot handle currently
-          return str(number)
-      
-      count = length // 3 if length % 3 == 0 else length // 3 + 1
-      copy = count
-      words = []
-   
-      for i in range(length - 1, -1, -3):
-          words.append(process(str(number)[0 if i - 2 < 0 else i - 2 : i + 1], copy - count))
-          count -= 1;
+    if num == "0":
+      return "zero"
+    
+    length = len(num)
+    
+    if(length > 3):   # this shouldn't happen
+      raise Exception
+    
+    num = num.zfill(3)    # pad with 0s
+    h, t, o = int(num[0]), int(num[1]), int(num[2])
 
-      final_words = ''
-      for s in reversed(words):
-          temp = s + ' '
-          final_words += temp
-      
-      return final_words
-  # End Main Logic
-  return getWords(int(token)).strip()
+    words = ones[h] + " hundred " if h != 0 else ""
+    
+    if t == 0:
+      words += ones[o]
+    elif t == 1:
+      words += ones[10 + o]
+    else:   # t > 1
+      words += tens[t] + " " + ones[o]
 
+    if words.endswith('zero'):
+        words = words[ : -len('zero') ]
+    else:
+        words += " "
+     
+    if words != "":
+        words += suffixes[idx]
+
+    # "" is returned if '000'
+    # ends with " " for idx = 0
+    return words;
+
+  
+  token = str(int(token))
+  length = len(token)
+  
+  if length>18:   # cannot handle currently
+    # raise NotImplementedError
+    return token
+  
+  idx = 0
+  words = []
+  
+  for i in range(length-1, -1, -3):
+    w = process(token[max(i-2,0) : i + 1], idx)
+    words.append(w) if w != "" else None
+    idx += 1
+  
+  return " ".join(reversed(words)).strip()
 
 
 def is_punctuation(token: str) -> bool:
