@@ -222,6 +222,7 @@ def test_handle_decimal_number_only():
 	assert handle_decimal_number_only("4") == to_spoken("4") == "four"
 	assert handle_decimal_number_only("55527") == to_spoken("55527") == "fifty five thousand five hundred twenty seven"
 	assert handle_decimal_number_only("13.0088") == to_spoken("13.0088") == "thirteen point o o eight eight"
+	assert handle_decimal_number_only("1000000000001") == to_spoken("1000000000001") == "one trillion one"
 
 def test_is_ordinal_number():
 	assert is_ordinal_number("1") is None
