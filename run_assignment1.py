@@ -729,11 +729,11 @@ def main(in_path: str, out_path: str) -> None:
 if __name__ == '__main__':
   
   parser = argparse.ArgumentParser(description='Rule-based Written-to-Spoken Text Conversion')
-  parser.add_argument('-i','--input_path', metavar="<path_to_input>", default="data/input train.json",
+  parser.add_argument('-i','--input_path', metavar="<path_to_input>", default="data/input.json",
                     help='path to input data')
-  parser.add_argument('-o','--solution_path', metavar="<path_to_solution>", default="out/output train.json",
+  parser.add_argument('-o','--solution_path', metavar="<path_to_solution>", default="out/output.json",
                     help='path to store output')
-  parser.add_argument('-g','--gold_path', metavar="<path_to_gold_output>", default="data/output train.json",
+  parser.add_argument('-g','--gold_path', metavar="<path_to_gold_output>", default="data/output.json",
                     help='path to gold output')
 
   args = parser.parse_args()
