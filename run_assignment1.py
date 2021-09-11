@@ -55,8 +55,8 @@ DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', '
 ORDINALS = {"one": "first", "two": "second", "three": "third", "five": "fifth", "eight": "eighth", "nine": "ninth", "twelve": "twelfth"}
 CURRENCIES = {"Re": (("rupee","rupees"),("paise","paise")), "Rs": (("rupee","rupees"),("paise","paise")), "₹": (("rupee","rupees"),("paise","paise")), "$": (("dollar","dollars"),("cent","cents")), "£": (("pound","pounds"),("penny","pence")) ,"€": (("euro","euros"),("cent","cents"))}
 CURRENCY_SUFFIXES = {"k": "thousand", "m": "million", "b": "billion", "tr": "trillion", "l": "lakh", "cr": "crore"}
-UNITS = {"%": ("percent","percent"), "pc": ("percent","percent"), "m": ("meter","meters"), "s": ("second","seconds"), "g": ("gram","grams"), "A": ("ampere","amperes"), "mol": ("mole","moles"), "mole": ("mole","moles"), "K": ("kelvin","kelvins"), "cd": ("candela","candelas"), "°": ("degree","degrees"), "°C": ("degree celsius","degrees celsius"), "°F": ("degree fahrenheit","degrees fahrenheit"), "V": ("volt","volts"), "W": ("watt","watts"), "N": ("newton","newtons"), "Pa": ("pascal","pascals"), "l": ("liter","liters"), "B": ("byte","bytes"), "b": ("bit","bits"), "mi": ("mile","miles"), "ha": ("hectare","hectares"), "hz": ("hertz","hertz"), "pm": ("p m","p m"), "am": ("a m","a m"), "sq": ("square","square"), "cu": ("cubic","cubic")}
-UNITS_PREFIX = {"n": "nano", "m": "milli", "c": "centi", "k": "kilo", "K": "kilo", "M": "mega", "G": "giga", "T": "terra", "P": "peta"}
+UNITS = {"%": ("percent","percent"), "pc": ("percent","percent"), "m": ("meter","meters"), "s": ("second","seconds"), "h": ("hour","hours"), "hr": ("hour","hours"), "g": ("gram","grams"), "A": ("ampere","amperes"), "mol": ("mole","moles"), "mole": ("mole","moles"), "K": ("kelvin","kelvins"), "cd": ("candela","candelas"), "°": ("degree","degrees"), "°C": ("degree celsius","degrees celsius"), "°F": ("degree fahrenheit","degrees fahrenheit"), "V": ("volt","volts"), "C": ("coulomb","coulombs"), "W": ("watt","watts"), "J": ("joule","joules"), "N": ("newton","newtons"), "Pa": ("pascal","pascals"), "l": ("liter","liters"), "B": ("byte","bytes"), "b": ("bit","bits"), "mi": ("mile","miles"), "ha": ("hectare","hectares"), "hz": ("hertz","hertz"), "pm": ("p m","p m"), "am": ("a m","a m"), "sq": ("square","square"), "cu": ("cubic","cubic")}
+UNITS_PREFIX = {"n": "nano", "μ": "micro", "m": "milli", "c": "centi", "k": "kilo", "K": "kilo", "M": "mega", "G": "giga", "T": "terra", "P": "peta"}
 UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square", "³": "cubic"}
 
 REGEX={
@@ -89,7 +89,7 @@ REGEX={
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
   "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
   "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"),   # maybe accept only YYYYs => others "seconds"?
-  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \-\/234\%\.\°²³]+)$")
+  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \-\/234\%\.\°²³μ]+)$")
 }
 
 

@@ -372,6 +372,10 @@ def test_handle_measurement():
 	
 	assert handle_measurement("1.1 K-kPa-MN-mV-s/A-m-kmol") == "one point one kelvin kilopascal meganewton millivolt seconds per ampere per meter per kilomole" == to_spoken("1.1 K-kPa-MN-mV-s/A-m-kmol")
 
+	assert handle_measurement("1 km/hr") == "one kilometer per hour" == to_spoken("1km/h")
+	assert handle_measurement("4 μC/cm2") == "four microcoulombs per square centimeter" == to_spoken("4 μC/cm2")
+	assert handle_measurement("10,000 kJ") == "ten thousand kilojoules" == to_spoken("10,000 kJ")
+
 def test_plus_minus():
 	assert to_spoken("- 3/5") == "minus three fifths"
 	assert to_spoken("- 2,020") == "minus two thousand twenty"
