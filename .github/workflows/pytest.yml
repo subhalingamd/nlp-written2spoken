@@ -1,13 +1,10 @@
-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python package
+name: Run Assignment
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ dev ]
   pull_request:
-    branches: [ main, dev ]
+    branches: [ dev ]
 
 jobs:
   build:
@@ -27,7 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
+        python -m pip install flake8 pytest gdown
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
@@ -38,3 +35,18 @@ jobs:
     - name: Test with pytest
       run: |
         pytest tests.py
+
+    - name: Download data
+      env:
+        DATA_URL: ${{ secrets.DATA_URL }}
+      run: |
+        gdown -q $DATA_URL
+    - name: Unzip data
+      run: |
+        unzip assignment_1_data.zip
+    - name: Generate solution
+      run: |
+        python run_assignment1.py --input_path assignment_1_data/input.json --solution_path assignment_1_data/myoutput.json
+    - name: Evaluate solution
+      run: |
+        python run_checker.py --solution_path assignment_1_data/myoutput.json --ground_truth assignment_1_data/output.json
