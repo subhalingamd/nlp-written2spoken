@@ -344,9 +344,17 @@ def test_handle_measurement():
 	assert handle_measurement("9.8 m / s2") == "nine point eight meters per square second" == to_spoken("9.8 m / s2")
 	assert handle_measurement("1000 kg/m³") == "one thousand kilograms per cubic meter" == to_spoken("1000 kg/m³")
 	assert handle_measurement("1g/l") == "one gram per liter" == to_spoken("1g/l")
-	assert handle_measurement("1.23 kg m") == "one point two three kilograms meters" == to_spoken("1.23 kg m")
+	assert handle_measurement("1.23 kg m") == "one point two three kilogram meters" == to_spoken("1.23 kg m")
+	assert handle_measurement("1.23 kg-m") == "one point two three kilogram meters" == to_spoken("1.23 kg-m")
+	assert handle_measurement("1.23 kg-m/K-s") == "one point two three kilogram meters per kelvin per second" == to_spoken("1.23 kg-m/K-s")
 	assert handle_measurement("1 Newton /s") == "one newton per second" == to_spoken("1 Newton /s")
 
+	assert handle_measurement("15 kg m / s") == "fifteen kilogram meters per second" == to_spoken("15 kg m/s")
+	assert handle_measurement("10N-s") == "ten newton seconds" == to_spoken("10N-s")
+	assert handle_measurement("6.67 N m2/kg²") == "six point six seven newton square meters per square kilogram" == to_spoken("6.67 N m2/kg²")
+	assert handle_measurement("4 V-s/A-m") == "four volt seconds per ampere per meter" == to_spoken("4 V-s/A-m")
+	
+	assert handle_measurement("1.1 K-kPa-MN-mV-s/A-m-kmol") == "one point one kelvin kilopascal meganewton millivolt seconds per ampere per meter per kilomole" == to_spoken("1.1 K-kPa-MN-mV-s/A-m-kmol")
 
 def test_plus_minus():
 	assert to_spoken("- 3/5") == "minus three fifths"

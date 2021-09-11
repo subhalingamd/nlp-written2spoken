@@ -89,7 +89,7 @@ REGEX={
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
   "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
   "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"), # TODO:: maybe accept only YYYYs => others "seconds"?
-  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \/234\%\.\°²³]+)$")
+  "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \-\/234\%\.\°²³]+)$")
 }
 
 
@@ -533,81 +533,95 @@ def is_measurement(token: str) -> bool:
 
 def handle_measurement(token: str) -> str:
   val, units = REGEX['measurement'].sub(r"\1;\2", token).split(";")
-  val, units = val.strip().replace(",",""), units.strip().replace(".","")
+  val, units = val.strip().replace(",",""), units.strip().replace(".","").replace("-"," ")
   # print(f"\n{val}")
   ans = [handle_decimal_number_only(val, process=False)]
   units = units.split("/")
+  units = [units[0], " ".join(units[1:])] if len(units) > 1 else [units[0]]  # XXX / YYY[/ZZZ...] => [XXX, YYY ZZZ]
   units_ans = []
   FIRST_UNIT = True
+  unit_count = 0
   for unit in units:
     curr_units_ans = []
     unit = unit.strip().split()
+    if unit_count==0:
+      unit = reversed(unit)
     for u in unit:
       u = u.strip()
+      curr_unit_words = ""
       if u[-1] in UNITS_SUFFIX.keys():
-        curr_units_ans.append(UNITS_SUFFIX[u[-1]])
+        curr_unit_words += UNITS_SUFFIX[u[-1]] + " "
         u = u[:-1]
 
       ## NOTE: `u` first to handle "p.m." case
       if u in UNITS:
         r = UNITS[u]
         r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-        curr_units_ans.append(r)
+        curr_unit_words += r
       elif u.lower() in UNITS:
         r = UNITS[u.lower()]
         r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]  
-        curr_units_ans.append(r)
+        curr_unit_words += r
       elif u[0] in UNITS_PREFIX.keys():
         p = UNITS_PREFIX[u[0]]
         if u[1:] in UNITS:
           r = UNITS[u[1:]]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0] 
-          curr_units_ans.append(p+r)
+          curr_unit_words += p+r
         elif u[1:].lower() in UNITS:
           r = UNITS[u[1:].lower()]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]  
-          curr_units_ans.append(p+r)
+          curr_unit_words += p+r
 
         elif u in UNITS:
           r = UNITS[u]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0] 
-          curr_units_ans.append(r)
+          curr_unit_words += r
         elif u.lower() in UNITS:
           r = UNITS[u.lower()]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-          curr_units_ans.append(r)
+          curr_unit_words += r
         else:
-          curr_units_ans.append(u.lower())
+          curr_unit_words += u.lower()
       elif u[0].lower() in UNITS_PREFIX.keys():
         p = UNITS_PREFIX[u[0].lower()]
         if u[1:] in UNITS:
           r = UNITS[u[1:]]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-          curr_units_ans.append(p+r)
+          curr_unit_words += p+r
         elif u[1:].lower() in UNITS:
           r = UNITS[u[1:].lower()]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-          curr_units_ans.append(p+r)
+          curr_unit_words += p+r
         
         elif u in UNITS:
           r = UNITS[u]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-          curr_units_ans.append(r)
+          curr_unit_words += r
         elif u.lower() in UNITS:
           r = UNITS[u.lower()]
           r = (r[0] if float(val)==1 else r[1]) if FIRST_UNIT else r[0]
-          curr_units_ans.append(r)
+          curr_unit_words += r
         else:
-          curr_units_ans.append(u.lower())
+          curr_unit_words += u.lower()
 
       else:
-        curr_units_ans.append(u.lower())
-      # print(curr_units_ans)
-    units_ans.append(" ".join(curr_units_ans))
-    FIRST_UNIT = False if len(units_ans)>0 and units_ans[0]!="" else True
+        curr_unit_words += u.lower()
+
+      if unit_count > 0:
+        units_ans.append(curr_unit_words.strip())
+      else:
+        curr_units_ans.append(curr_unit_words.strip())
+      FIRST_UNIT = False if not FIRST_UNIT or (len(curr_units_ans)>0 and curr_units_ans[0]!="") else True
+
+    if unit_count == 0:
+      units_ans.append(" ".join(reversed(curr_units_ans)))
+    unit_count+=1
+  
+
   # print(units_ans)
   ans.append(" per ".join(units_ans))
-  return re.sub(r"\s{2,}", " " , " ".join(ans))
+  return re.sub(r"\s{2,}", " " , " ".join(ans)).strip()
 
 def to_spoken(token: str) -> str:
   token = token.strip()
