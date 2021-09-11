@@ -65,6 +65,11 @@ def test_time():
 	assert to_spoken("48:00") == "forty eight hours and zero minutes"
 	assert to_spoken("36:11") == "thirty six hours and eleven minutes"
 
+	assert to_spoken("1:04:01") == "one hour four minutes and one second"
+	assert to_spoken("4:01:01") == "four hours one minute and one second"
+	assert to_spoken("01:01:56") == "one hour one minute and fifty six seconds"
+	assert to_spoken("48:01") == "forty eight hours and one minute"
+
 
 def test_handle_number_to_words():
 	assert handle_number_to_words("0") == "zero"

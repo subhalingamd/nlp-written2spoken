@@ -203,9 +203,14 @@ def handle_time(token: str) -> str:
   token = [handle_number_to_words(times[0])]  # output
 
   if len(times)==3:
-    token.extend(['hours', handle_number_to_words(times[1]), 'minutes and', handle_number_to_words(times[2]), 'seconds'])
+    token.append('hours') if token[-1] != "one" else token.append('hour')
+    token.append(handle_number_to_words(times[1]))
+    token.append('minutes and') if token[-1] != "one" else token.append('minute and')
+    token.append(handle_number_to_words(times[2]))
+    token.append('seconds') if token[-1] != "one" else token.append('second')
   elif int(times[0]) >= 24: # if hrs > 24 => countdown
-    token.extend(['hours and', handle_number_to_words(times[1]), 'minutes'])
+    token.extend(['hours and', handle_number_to_words(times[1])])
+    token.append('minutes') if token[-1] != "one" else token.append('minute')
   else:
     if times[1] == "00":
       if int(times[0]) > 12 or int(times[0]) == 0:  # adding "hundred" if min == "00"  :: TODO
