@@ -524,6 +524,8 @@ def handle_year_with_s(token: str) -> str:
   token = handle_date__year(token)
   if token[-1] == "y":
     token = token[:-1] + "ies"
+  elif token[-1] == "x":    # e.g., six
+    token = token + "es"
   else:
     token = token + "s"
   return token

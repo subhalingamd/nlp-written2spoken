@@ -309,6 +309,7 @@ def test_is_year_with_s():
 def test_handle_year_with_s():
 	assert handle_year_with_s("1940s") == to_spoken("1940s") == "nineteen forties"
 	assert handle_year_with_s("1900s") == to_spoken("1900s") == "nineteen hundreds"
+	assert handle_year_with_s("2006s") == to_spoken("2006s") == "two thousand sixes" ## TODO
 
 
 def test_is_measurement():
