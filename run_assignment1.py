@@ -637,63 +637,66 @@ def handle_measurement(token: str) -> str:
 
 def to_spoken(token: str) -> str:
   token = token.strip()
-  if is_punctuation(token):
-    return handle_punctuation(token)
-  elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
-    return handle_abbreviation(token)
-  elif is_roman(token):
-    return handle_roman_to_numeral(token)
-  elif is_abbreviation(token):
-    return handle_abbreviation(token)
-  elif is_time(token):
-    return handle_time(token)
-  elif is_date(token):
-    return handle_date(token)
-  elif is_number_spoken_as_digits(token):
-    return handle_number_spoken_as_digits(token)
-  elif is_decimal_number_only(token):
-    return handle_decimal_number_only(token)
-  elif is_ordinal_number(token):
-    return handle_ordinal_number(token)
-  elif is_fraction_only(token):
-    return handle_fraction_only(token)
-  elif is_mixed_fraction(token):
-    return handle_mixed_fraction(token)
-  elif is_currency(token):
-    return handle_currency(token)
-  elif is_year_with_s(token):
-    return handle_year_with_s(token)
-  elif is_measurement(token):
-    return handle_measurement(token)
-  elif token[0] == "-":
-    rec = to_spoken(token[1:])
-    if rec == "<self>":
-      return "<self>"
-    elif rec == "sil":
-      return "sil"
-    else:
-      return "minus " + rec     
-  elif token[0] == "+":
-    rec = to_spoken(token[1:])
-    if rec == "<self>":
-      return "<self>"
-    elif rec == "sil":
-      return "sil"
-    else:
-      return "plus " + rec
-  elif "." in token and not token.endswith('.'):    ## TODO
-    tokens = token.split(".")
-    ans = []
-    for t in tokens:
-      if is_decimal_number_only(t):
-        s = handle_decimal_number_only(t, process=False)
-        if s == "zero":
-          s = "o"
+  try:
+    if is_punctuation(token):
+      return handle_punctuation(token)
+    elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
+      return handle_abbreviation(token)
+    elif is_roman(token):
+      return handle_roman_to_numeral(token)
+    elif is_abbreviation(token):
+      return handle_abbreviation(token)
+    elif is_time(token):
+      return handle_time(token)
+    elif is_date(token):
+      return handle_date(token)
+    elif is_number_spoken_as_digits(token):
+      return handle_number_spoken_as_digits(token)
+    elif is_decimal_number_only(token):
+      return handle_decimal_number_only(token)
+    elif is_ordinal_number(token):
+      return handle_ordinal_number(token)
+    elif is_fraction_only(token):
+      return handle_fraction_only(token)
+    elif is_mixed_fraction(token):
+      return handle_mixed_fraction(token)
+    elif is_currency(token):
+      return handle_currency(token)
+    elif is_year_with_s(token):
+      return handle_year_with_s(token)
+    elif is_measurement(token):
+      return handle_measurement(token)
+    elif token[0] == "-":   ## TODO
+      rec = to_spoken(token[1:])
+      if rec == "<self>":
+        return "<self>"
+      elif rec == "sil":
+        return "sil"
       else:
-        s = t
-      ans.append(s)
-    return " dot ".join(ans).strip()
-  else:
+        return "minus " + rec     
+    elif token[0] == "+":
+      rec = to_spoken(token[1:])
+      if rec == "<self>":
+        return "<self>"
+      elif rec == "sil":
+        return "sil"
+      else:
+        return "plus " + rec
+    elif "." in token and not token.endswith('.'):    ## TODO
+      tokens = token.split(".")
+      ans = []
+      for t in tokens:
+        if is_decimal_number_only(t):
+          s = handle_decimal_number_only(t, process=False)
+          if s == "zero":
+            s = "o"
+        else:
+          s = t
+        ans.append(s)
+      return " dot ".join(ans).strip()
+    else:
+      return '<self>'
+  except Exception:   # Something went wrong :/
     return '<self>'
 
 def solution(input_tokens: [str]) -> [str]:
