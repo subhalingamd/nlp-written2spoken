@@ -418,6 +418,8 @@ def handle_decimal_number_only(token: str, process: bool = True) -> str:
     return handle_number_spoken_as_digits(token)
   #elif process and len(token) == 10:  # phone number?
   #  return handle_number_spoken_as_digits(token)
+  elif len(token.replace(",","").split('.')[0]) > 18:   # integer part length > 18 NotImplemented
+    return handle_number_spoken_as_digits(token)
   else:
     token = token.replace(",","").split(".")
     ans = []
