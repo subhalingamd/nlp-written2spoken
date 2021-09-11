@@ -68,7 +68,7 @@ REGEX={
 
   "date__wo_date": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s*\,?\s+((?:\'|\d?\d)\d\d)$"),
   "date__wo_date_abbr": re.compile(r"^((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\s*\.?\s*\,?\s*((?:\'|\d?\d)\d\d)$"),
-  "date__wo_date_3": re.compile(r"^(\d?\d)\s*[\-]\s*(\d?\d\d\d)$"), ## NOTE: TODO:: ignoring '/' for fractions; '.' for decimals
+  "date__wo_date_3": re.compile(r"^(\d?\d)\s*[\-]\s*(\d?\d\d\d)$"), ## NOTE: ignoring '/' for fractions; '.' for decimals
   "date__wo_year": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s+((?:"+ r'|'.join(MONTHS) +r"))$"),
   "date__wo_year_1": re.compile(r"^((?:"+ r'|'.join(MONTHS) +r"))\s+(\d?\d)\s*([a-z]{0,2}?)$"),
   "date__wo_year_abbr": re.compile(r"^(\d?\d)\s*([a-z]{0,2}?)\s*\.?\s*\,?\s*((?:"+ r'|'.join([m[:3] for m in MONTHS]) +r"|sept))\.?$"),
@@ -83,12 +83,12 @@ REGEX={
   "date_3": re.compile(r"^(\d?\d)\s*[\/\-\.\|]\s*(\d?\d)\s*[\/\-\.\|]\s*(\d?\d\d\d)$"),
 
   "number_by_digits" : re.compile(r"^\(?\s*\d+\s*\)?\s*[\-\(\) ]+\s*\d+\s*[0-9\-\(\) ]*$"),
-  "decimal_number_only": re.compile(r"^(?:(?:\d[0-9\,]*(\.\d*)?)|(?:\.\d+))$"),   # space? :: TODO
+  "decimal_number_only": re.compile(r"^(?:(?:\d[0-9\,]*(\.\d*)?)|(?:\.\d+))$"),   # spaces removed in function
   "ordinal_number": re.compile(r"^(\d[0-9\,]{0,})\s*(st|nd|rd|th)$"),
   "fraction_only": re.compile(r"^(\d[0-9\,]{0,})\s*\/\s*(\d[0-9\,]{0,})$"),
   "mixed_fraction": re.compile(r"^(\d[0-9\,]{0,})\s+(\d[0-9\,]{0,})\/(\d[0-9\,]{0,})$"),
   "currency" : re.compile(r"^((?:"+ "|".join([c for c in CURRENCIES.keys() if c!="$"]) +r"|\$))\.?\s*([0-9\.\, ]+?)\s*([a-zA-Z .]*)$"),
-  "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"), # TODO:: maybe accept only YYYYs => others "seconds"?
+  "year_with_s": re.compile(r"^([1-2]\d\d\d)s$"),   # maybe accept only YYYYs => others "seconds"?
   "measurement": re.compile(r"^([0-9][0-9 \.\,]*)\s*?([a-zA-Z \-\/234\%\.\°²³]+)$")
 }
 
@@ -213,7 +213,7 @@ def handle_time(token: str) -> str:
     token.append('minutes') if token[-1] != "one" else token.append('minute')
   else:
     if times[1] == "00":
-      if int(times[0]) > 12 or int(times[0]) == 0:  # adding "hundred" if min == "00"  :: TODO
+      if int(times[0]) > 12 or int(times[0]) == 0:
         token.append("hundred")
       elif "hr" in "".join(tokens).lower().replace(".",""):
         token.append("hundred")
@@ -224,7 +224,6 @@ def handle_time(token: str) -> str:
 
 
   for i in range(1,len(tokens)):
-    # handle "hrs" text :: TODO
     if "hr" in tokens[i].lower().replace(".",""):
       token.append('hours')
       continue
@@ -311,7 +310,6 @@ def preprocess_date(token: str) -> str:
     return " ".join(s)
   elif REGEX['date_2'].match(token):
     s = REGEX['date_2'].sub(r"\3 \2 \1",token).split()
-    # try..except if index error.. maybe telephone number :: TODO
     if int(s[1]) > 12:
       s[0],s[1] = s[1],s[0]
     try:
@@ -398,12 +396,16 @@ def handle_number_spoken_as_digits(token: str) -> str:
     if REGEX['punctuation'].match(ch):
       p = handle_punctuation(ch)
       ans.append(p) if len(ans)==0 or ans[-1]!=p else None
-    else: ## TODO:: INDEX ERROR?
-      ans.append(DIGITS[int(ch)])
+    else:
+      try:
+        ans.append(DIGITS[int(ch)])
+      except IndexError:    # Shouldn't happen ideally
+        p = "sil"
+        ans.append(p) if len(ans)==0 or ans[-1]!=p else None
   return " ".join(ans)
 
 def is_decimal_number_only(token: str) -> bool:
-  return REGEX['decimal_number_only'].match(token)  # not match space 
+  return REGEX['decimal_number_only'].match(token.replace(" ",""))  # not match space 
 
 def handle_decimal_number_only(token: str, process: bool = True) -> str:
   if process and re.match(r"^[1-9]\d\d\d$",token):  # probably a year (no comma!)
@@ -506,7 +508,6 @@ def handle_currency(token: str) -> str:
       ans = [] if int(i)==0 else ans
       ans.append(handle_number_to_words(f))
       ans.append(unit[1][0] if int(f)==1 else unit[1][1])
-      ## 0 cents ?? :: TODO
     else:
       ans.append(handle_number_to_words(val))
       ans.append(unit[0][0] if int(val)==1 else unit[0][1])
