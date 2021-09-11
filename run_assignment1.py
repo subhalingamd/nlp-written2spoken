@@ -212,7 +212,7 @@ def handle_time(token: str) -> str:
         token.append("hundred")
       elif "hr" in "".join(tokens).lower().replace(".",""):
         token.append("hundred")
-      elif "am" not in "".join(tokens).lower().replace(".","") and "pm" not in "".join(tokens).lower().replace(".",""):
+      elif "am" not in "".join(tokens).lower().replace(".","").replace("amst","").replace("amt","") and "pm" not in "".join(tokens).lower().replace(".","").replace("pmdt","").replace("pmst",""):
         token.append("o'clock")
     else:
       token.append(handle_number_to_words(times[1]))

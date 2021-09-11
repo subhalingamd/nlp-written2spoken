@@ -52,6 +52,13 @@ def test_time():
 	assert to_spoken("6:00 hrs IST") == "six hundred hours i s t"
 	assert to_spoken("7:00hrs. IST") == "seven hundred hours i s t"
 	assert to_spoken("10:00 IST") == "ten o'clock i s t"
+	
+	assert to_spoken("10:00 A.M.T") == "ten o'clock a m t"
+	assert to_spoken("10:00 G.A.M.T") == "ten o'clock g a m t"
+	assert to_spoken("10:00 p.m.s.t.") == "ten o'clock p m s t"
+	assert to_spoken("10:00 am AMT") == "ten a m a m t"
+	assert to_spoken("10:00 am GAMT") == "ten a m g a m t"
+	assert to_spoken("10:00 pm P.M.D.T.") == "ten p m p m d t"
 
 	assert to_spoken("6:00:00") == "six hours zero minutes and zero seconds"
 	assert to_spoken("6:20:56") == "six hours twenty minutes and fifty six seconds"
