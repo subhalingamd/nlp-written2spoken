@@ -170,8 +170,8 @@ def handle_roman_to_numeral(token: str) -> str:
   rom_val = {'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000}
   int_val = rom_val[token[0]]
   for i in range(1,len(token)):
-      if rom_val[token[i]] > rom_val[token[i - 1]]:
-          int_val += rom_val[token[i]] - 2 * rom_val[token[i - 1]]
+      if rom_val[token[i]] > rom_val[token[i-1]]:
+          int_val += rom_val[token[i]] - 2*rom_val[token[i-1]]
       else:
           int_val += rom_val[token[i]]
   return handle_number_to_words(int_val)
