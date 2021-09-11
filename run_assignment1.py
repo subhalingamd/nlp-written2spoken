@@ -738,8 +738,8 @@ if __name__ == '__main__':
 
   args = parser.parse_args()
   
-  analyze(in_path=args.input_path,gold_path=args.gold_path)
+  # analyze(in_path=args.input_path,gold_path=args.gold_path)
   main(in_path=args.input_path,out_path=args.solution_path)
-  print('\n\n-----------\n\n')
-  analyze(in_path=args.input_path,gold_path=args.solution_path)
+  # print('\n\n-----------\n\n')
+  # analyze(in_path=args.input_path,gold_path=args.solution_path)
 
