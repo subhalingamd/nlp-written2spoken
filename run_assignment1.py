@@ -62,7 +62,7 @@ UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square", "³": "cubic"}
 REGEX={
   "punctuation": re.compile(r"[^A-Za-z0-9]"),
   "roman_exception": re.compile(r"^(CC|CD|CV|DC|MC|MD|MI)$"), # Adapted from: http://www.web40571.clarahost.co.uk/roman/quiza.htm
-  "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"), # Adapted from: https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
+  "roman": re.compile(r"^M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"),
   "abbreviation": re.compile(r"^(?:(?:[A-Z]\.?)|(?:[A-Z]+[A-Za-z .]*[A-Z]+[A-Za-z .]*)|(?:[a-z .]+[A-Z]+[A-Za-z .]*)|(?:(?:[a-z]+\.+\s*)+))\-?$"),
   "time": re.compile(r"[0-9]{1,}\s*:\s*[0-5][0-9]"),
 
@@ -473,7 +473,6 @@ def handle_fraction_only(token: str) -> str:
     else:
       d += "s"
 
-  ## is it "one half"?? :: TODO <<#1>>
   n = handle_number_to_words(n)
 
   return f"{n} {d}"
@@ -642,7 +641,7 @@ def to_spoken(token: str) -> str:
   try:
     if is_punctuation(token):
       return handle_punctuation(token)
-    elif is_roman_exception(token): # TODO:: what about V,X,L,C,M ??
+    elif is_roman_exception(token):   # Note: V,X,L,C,M considered as "Roman"
       return handle_abbreviation(token)
     elif is_roman(token):
       return handle_roman_to_numeral(token)

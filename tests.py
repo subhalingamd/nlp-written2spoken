@@ -186,8 +186,7 @@ def test_handle_date():
 	assert to_spoken("26-10") == "the twenty sixth of october"
 	assert to_spoken("26-14") == "two six sil one four"
 
-	## TODO::
-	assert to_spoken("21 janu 2008") == "<self>"
+	assert to_spoken("21 janu 2008") == "<self>"		# Misc
 
 def test_is_number_spoken_as_digits():
 	assert is_number_spoken_as_digits("1 1/2") == False
@@ -271,7 +270,7 @@ def test_is_fraction_only():
 
 
 def test_handle_fraction_only():
-	assert handle_fraction_only("1/2") == to_spoken("1/2") == "one half" ## check TODO
+	assert handle_fraction_only("1/2") == to_spoken("1/2") == "one half"
 	assert handle_fraction_only("3/4") == to_spoken("3/4") == "three quarters"
 	assert handle_fraction_only("2/3") == to_spoken("2/3") == "two thirds"
 	assert handle_fraction_only("1/10") == to_spoken("1/10") == "one tenth"
@@ -328,7 +327,7 @@ def test_is_year_with_s():
 def test_handle_year_with_s():
 	assert handle_year_with_s("1940s") == to_spoken("1940s") == "nineteen forties"
 	assert handle_year_with_s("1900s") == to_spoken("1900s") == "nineteen hundreds"
-	assert handle_year_with_s("2006s") == to_spoken("2006s") == "two thousand sixes" ## TODO
+	assert handle_year_with_s("2006s") == to_spoken("2006s") == "two thousand sixes"
 
 
 def test_is_measurement():
