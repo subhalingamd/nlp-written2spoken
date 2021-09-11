@@ -655,6 +655,18 @@ def to_spoken(token: str) -> str:
       return "sil"
     else:
       return "plus " + rec
+  elif "." in token and not token.endswith('.'):    ## TODO
+    tokens = token.split(".")
+    ans = []
+    for t in tokens:
+      if is_decimal_number_only(t):
+        s = handle_decimal_number_only(t, process=False)
+        if s == "zero":
+          s = "o"
+      else:
+        s = t
+      ans.append(s)
+    return " dot ".join(ans).strip()
   else:
     return '<self>'
 

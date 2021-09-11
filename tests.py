@@ -356,6 +356,9 @@ def test_plus_minus():
 	assert to_spoken(" +3.14") == "plus three point one four"
 
 
+def test_dot_split():
+	assert to_spoken("192.168.0.1") == "one hundred ninety two dot one hundred sixty eight dot o dot one"
+	assert to_spoken("subhalingamd.me") == "subhalingamd dot me"
 
 def test_assignment_examples():
 	assert to_spoken("U.S") == "u s" == to_spoken("US")
