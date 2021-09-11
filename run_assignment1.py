@@ -184,7 +184,7 @@ def is_abbreviation(token: str) -> bool:
       upper_lower+=1
     elif ch.islower():
       upper_lower-=1
-  return len(token)>1 and ('.' in token or token.endswith("-") or upper_lower>0) and REGEX['abbreviation'].match(token);
+  return len(token)>1 and (token.endswith("-") or upper_lower>0) and REGEX['abbreviation'].match(token);
 
 def handle_abbreviation(token: str) -> str:
   ans = " ".join(list(token.replace(".","").replace("-","").replace(" ","").lower()))
