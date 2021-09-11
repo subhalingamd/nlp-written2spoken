@@ -70,6 +70,8 @@ def test_time():
 	assert to_spoken("01:01:56") == "one hour one minute and fifty six seconds"
 	assert to_spoken("48:01") == "forty eight hours and one minute"
 
+	assert to_spoken("12:00 noon") == "twelve noon"
+	assert to_spoken("12:00midnight. IST") == "twelve midnight i s t"
 
 def test_handle_number_to_words():
 	assert handle_number_to_words("0") == "zero"
