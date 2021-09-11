@@ -1,0 +1,32 @@
+References
+----------
+
+* https://www.geeksforgeeks.org/validating-roman-numerals-using-regular-expression/
+	* Intended to learn the rules rather than using the REGEX from the link
+* http://www.web40571.clarahost.co.uk/roman/quiza.htm
+	* Which valid roman numerals are common abbreviations (e.g., CD)
+* https://www.codesansar.com/python-programming-examples/number-words-conversion-no-library-used.htm
+	* Intended to get an idea of the different rules involved
+* https://thefractioncalculator.com/WriteFractionsInWords/How-to-write-3/2-in-words.html
+	* Fractions in words for different inputs (replace the "3/2" in URL) [just the answers- no code involved]
+* https://sciencing.com/fundamental-similarities-between-fractions-decimals-8510600.html
+	* Fractions (including mixed fractions) in words examples
+	* 1/2 is "one half"
+* https://www.yoosfuhl.com/online/conversion/number/numbers-to-words-converter
+	* Currency values in words examples
+* https://www.nist.gov/pml/weights-and-measures/metric-si/si-units
+	* List of SI units
+* https://www.wordhippo.com/what-is/the-plural-of/kelvin.html
+	* Plural of units (replace "kelvin" with any unit)
+* https://usma.org/commonly-used-metric-system-units-symbols-and-prefixes
+	* Commonly used units
+* https://english.stackexchange.com/questions/235235/plurals-for-multiplied-units
+	* Plural Inflections for units
+* https://www.timeanddate.com/time/zones/
+	* Different time zones (especially those matching "*AM*"/"*PM*")
+
+* Part of (starter) code was taken from the Google Colab link provided in the assignment document
+
+
+* Specifications (patterns, clarifications, examples, ...) of assignment was discussed with the course TAs only
+
