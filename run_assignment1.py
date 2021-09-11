@@ -48,14 +48,14 @@ def analyze(in_path: str,gold_path: str) -> None:
 
 """# Solution"""
 
-VOWELS = set(['a','e','i','o','u'])
-MONTHS = ["january","february","march","april","may","june","july","august","september","october","november","december"]
-DAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
+VOWELS = set(('a','e','i','o','u'))
+MONTHS = ("january","february","march","april","may","june","july","august","september","october","november","december")
+DAYS = ("sunday","monday","tuesday","wednesday","thursday","friday","saturday")
 DIGITS = ('o', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine')
 ORDINALS = {"one": "first", "two": "second", "three": "third", "five": "fifth", "eight": "eighth", "nine": "ninth", "twelve": "twelfth"}
-CURRENCIES = {"Re": [["rupee","rupees"],["paise","paise"]], "Rs": [["rupee","rupees"],["paise","paise"]], "₹": [["rupee","rupees"],["paise","paise"]], "$": [["dollar","dollars"],["cent","cents"]], "£": [["pound","pounds"],["penny","pence"]] ,"€": [["euro","euros"],["cent","cents"]]}
+CURRENCIES = {"Re": (("rupee","rupees"),("paise","paise")), "Rs": (("rupee","rupees"),("paise","paise")), "₹": (("rupee","rupees"),("paise","paise")), "$": (("dollar","dollars"),("cent","cents")), "£": (("pound","pounds"),("penny","pence")) ,"€": (("euro","euros"),("cent","cents"))}
 CURRENCY_SUFFIXES = {"k": "thousand", "m": "million", "b": "billion", "tr": "trillion", "l": "lakh", "cr": "crore"}
-UNITS = {"%": ["percent","percent"], "pc": ["percent","percent"], "m": ["meter","meters"], "s": ["second","seconds"], "g": ["gram","grams"], "A": ["ampere","amperes"], "mol": ["mole","moles"], "mole": ["mole","moles"], "K": ["kelvin","kelvins"], "cd": ["candela","candelas"], "°": ["degree","degrees"], "°C": ["degree celsius","degrees celsius"], "°F": ["degree fahrenheit","degrees fahrenheit"], "V": ["volt","volts"], "W": ["watt","watts"], "N": ["newton","newtons"], "Pa": ["pascal","pascals"], "l": ["liter","liters"], "B": ["byte","bytes"], "b": ["bit","bits"], "mi": ["mile","miles"], "ha": ["hectare","hectares"], "hz": ["hertz","hertz"], "pm": ["p m","p m"], "am": ["a m","a m"], "sq": ["square","square"], "cu": ["cubic","cubic"]}
+UNITS = {"%": ("percent","percent"), "pc": ("percent","percent"), "m": ("meter","meters"), "s": ("second","seconds"), "g": ("gram","grams"), "A": ("ampere","amperes"), "mol": ("mole","moles"), "mole": ("mole","moles"), "K": ("kelvin","kelvins"), "cd": ("candela","candelas"), "°": ("degree","degrees"), "°C": ("degree celsius","degrees celsius"), "°F": ("degree fahrenheit","degrees fahrenheit"), "V": ("volt","volts"), "W": ("watt","watts"), "N": ("newton","newtons"), "Pa": ("pascal","pascals"), "l": ("liter","liters"), "B": ("byte","bytes"), "b": ("bit","bits"), "mi": ("mile","miles"), "ha": ("hectare","hectares"), "hz": ("hertz","hertz"), "pm": ("p m","p m"), "am": ("a m","a m"), "sq": ("square","square"), "cu": ("cubic","cubic")}
 UNITS_PREFIX = {"n": "nano", "m": "milli", "c": "centi", "k": "kilo", "K": "kilo", "M": "mega", "G": "giga", "T": "terra", "P": "peta"}
 UNITS_SUFFIX = {"2": "square", "3": "cubic", "²": "square", "³": "cubic"}
 
@@ -101,7 +101,7 @@ def handle_number_to_words(token: str) -> str:
   suffixes = ('', 'thousand', 'million', 'billion', 'trillion', 'quadrillion')
 
   def process(num: str, idx: int) -> str:
-
+    
     if num == "0":
       return "zero"
     
@@ -132,7 +132,7 @@ def handle_number_to_words(token: str) -> str:
 
     # "" is returned if '000'
     # ends with " " for idx = 0
-    return words;
+    return words.strip()
 
   
   token = str(int(token))
@@ -146,7 +146,7 @@ def handle_number_to_words(token: str) -> str:
   words = []
   
   for i in range(length-1, -1, -3):
-    w = process(token[max(i-2,0) : i + 1], idx)
+    w = process(token[max(i-2,0) : i+1], idx)
     words.append(w) if w != "" else None
     idx += 1
   
